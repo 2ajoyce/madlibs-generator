@@ -1,0 +1,87 @@
+#root {
+  max-width: 800px; /* Adjusted for a more focused layout */
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+/* Simplified logo styles, removed animations and shadows */
+.logo {
+  height: 4em; /* Smaller logo size */
+  padding: 1em;
+}
+
+/* Basic styling for the card where user inputs and story will be displayed */
+.card {
+  padding: 2em;
+  border: 1px solid #ddd; /* Add a border for better definition */
+  margin-top: 1em;
+  border-radius: 8px; /* Rounded corners */
+}
+
+/* Style for input fields */
+input[type="text"] {
+  padding: 0.5em;
+  margin: 0.5em;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Simplified style for additional information text */
+.read-the-docs {
+  color: #888;
+  font-size: 0.8em;
+}
+
+/* Container for the file uploads */
+.upload-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 1em;
+}
+
+/* Individual upload boxes */
+.upload-box {
+  flex: 1; /* Each box takes up half the space */
+  padding: 1em;
+  margin: 0.5em;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  text-align: left;
+}
+
+input[type="file"] {
+  width: 100%; /* Make file input take the full width */
+  margin-top: 0.5em;
+}
+
+.info-icon {
+  display: inline-block;
+  margin-left: 0.5em;
+  cursor: help;
+}
+
+.button-container {
+  text-align: center;
+  margin-top: 1em;
+}
+
+.story-output {
+  margin-top: 1em;
+  text-align: center;
+}
+
+.generate-spreadsheet-container {
+  text-align: center;
+  margin-bottom: 1em;
+}
+
+.story-output {
+  white-space: pre-wrap;
+  text-align: left;
+  margin: 1em auto;
+  padding: 1em;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  max-width: 800px;
+}
