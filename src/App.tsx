@@ -15,9 +15,30 @@ function App() {
   const [webrtcDetails, setWebrtcDetails] = useState<any | null>(null);
   const REGISTER_SESSION_URL =
     "https://us-central1-madlibs-408303.cloudfunctions.net/register-session";
+  const FAKE_WEBRTC = {
+    sdp: {
+      type: "offer",
+      sdp: "v=0\r\no=- 46108309 46108309 IN IP4 0.0.0.0\r\ns=-\r\nc=IN IP4 0.0.0.0\r\nt=0 0\r\na=ice-ufrag:sample\r\na=ice-pwd:samplepwd\r\na=fingerprint:sha-256 4A:AD:B9:B1:3F:82:18:3B:CE:2B:4F:80:35:46:D9:C0:C4:D8:AA:E1:6B:5B:61:2F:2F:3D:55:3D:2E:3F:49:11\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111 103 104 9 0 8 106 105 13 126\r\na=mid:audio0\r\n",
+    },
+    iceCandidates: [
+      {
+        candidate:
+          "candidate:842163049 1 udp 1686052607 1.2.3.4 46154 typ srflx raddr 0.0.0.0 rport 0 generation 0 ufrag sample network-id 3 network-cost 10",
+        sdpMid: "audio0",
+        sdpMLineIndex: 0,
+      },
+      {
+        candidate:
+          "candidate:842163049 2 udp 1686052606 1.2.3.4 46155 typ srflx raddr 0.0.0.0 rport 0 generation 0 ufrag sample network-id 3 network-cost 10",
+        sdpMid: "audio0",
+        sdpMLineIndex: 0,
+      },
+    ],
+  };
 
   // Function to register a new session
   async function registerSession(webrtcDetails: any): Promise<string> {
+    setWebrtcDetails(FAKE_WEBRTC);
     try {
       const response = await fetch(REGISTER_SESSION_URL, {
         method: "POST",
@@ -38,18 +59,18 @@ function App() {
   }
 
   // Function to get session details
-  async function getSession(sessionId: string): Promise<any> {
-    try {
-      const response = await fetch(`${REGISTER_SESSION_URL}/${sessionId}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    } catch (error) {
-      console.error("Error getting session:", error);
-      throw error;
-    }
-  }
+  // async function getSession(sessionId: string): Promise<any> {
+  //   try {
+  //     const response = await fetch(`${REGISTER_SESSION_URL}/${sessionId}`);
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
+  //     return response.json();
+  //   } catch (error) {
+  //     console.error("Error getting session:", error);
+  //     throw error;
+  //   }
+  // }
 
   const handleCollaborateClick = async () => {
     try {
