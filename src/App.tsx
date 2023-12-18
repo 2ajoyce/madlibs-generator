@@ -8,6 +8,17 @@ type Inputs = {
   [key: string]: string;
 };
 
+const SERVER_URI = "madlibs-server-xxnwdd2lpq-uc.a.run.app";
+const SERVER_KEY = "d41d8cd98f00b204e9800998ecf8427e";
+const SERVER_CONNECTION = {
+  host: SERVER_URI,
+  port: 443,
+  ping: 1000 * 15, // 15s ping
+  secure: true,
+  debug: 2,
+  key: SERVER_KEY,
+};
+
 function App() {
   const [template, setTemplate] = useState("");
   const [templateFields, setTemplateFields] = useState<string[]>([]);
@@ -34,15 +45,19 @@ function App() {
 
   useEffect(() => {
     if (sessionId) {
-      console.log(`Creating peer for sessionId ${sessionId}`);
+      console.log(`Creating peer to join existing session: ${sessionId}`);
       createPeer();
     }
   }, [sessionId]);
 
   useEffect(() => {
     if (peer?.id) {
-      console.log("Session created with ID:", peer.id);
+      console.log("Peer created with ID:", peer.id);
+      peer.on("error", (err) => {
+        console.log("Error: ", err);
+      });
       if (sessionId) {
+        // If this is connection to a session
         console.log(`Connecting to session ${sessionId}`);
         const conn = peer.connect(sessionId);
         conn.on("open", () => {
@@ -50,39 +65,45 @@ function App() {
           conn.on("data", function (data) {
             console.log("Received", data);
           });
-
           conn.send("Hello!");
         });
 
         conn.on("error", (err) => {
           console.log("Connection Error: ", err);
         });
+      } else {
+        // If this is hosting a session
+        peer.on("open", (id) => {
+          console.log(`My peer ID is ${id}`);
+        });
+        peer.on("connection", (conn) => {
+          console.log(`Incoming connection with ${conn.connectionId}`);
+          conn.on("open", () => {
+            console.log("Connection Established!");
+            conn.on("data", function (data) {
+              console.log("Received", data);
+            });
+            conn.send("Hello!");
+          });
+
+          conn.on("error", (err) => {
+            console.log("Connection Error: ", err);
+          });
+        });
       }
     }
   }, [peer]);
 
   const createPeer = () => {
-    if (peer) return peer;
-    const newSessionId = uuidv4();
-    const SERVER_URI = "https://madlibs-server-xxnwdd2lpq-uc.a.run.app";
-    const SERVER_KEY = "d41d8cd98f00b204e9800998ecf8427e";
-    const SERVER_CONNECTION = {
-      host: SERVER_URI,
-      port: 443,
-      ping: 1000 * 15, // 15s ping
-      secure: true,
-      debug: 2,
-      key: SERVER_KEY,
-    };
-    const newPeer = new Peer(newSessionId, SERVER_CONNECTION);
-    newPeer.on("open", (id) => {
-      console.log(`My peer ID is ${id}`);
-    });
-    newPeer.on("connection", (conn) => {
-      console.log(`Incoming connection with ${conn.connectionId}`);
-      conn.send("Hello!");
-    });
-    setPeer(newPeer);
+    if (peer) {
+      console.log(`Reusing existing peer ${peer.id}`);
+      return peer;
+    } else {
+      console.log("Creating new peer");
+      const newSessionId = uuidv4();
+      const newPeer = new Peer(newSessionId, SERVER_CONNECTION);
+      setPeer(newPeer);
+    }
   };
 
   const handleCollaborateClick = async () => {
