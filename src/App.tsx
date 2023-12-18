@@ -1,4 +1,6 @@
-import { ChangeEvent, useState } from "react";
+import { Peer } from "peerjs";
+import { ChangeEvent, useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import * as XLSX from "xlsx";
 import "./App.css";
 
@@ -11,72 +13,68 @@ function App() {
   const [templateFields, setTemplateFields] = useState<string[]>([]);
   const [inputs, setInputs] = useState<Inputs>({});
   const [story, setStory] = useState("");
+  // sessionId is intended to store the parent session. Current session can be retrieved from peer.id
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [webrtcDetails, setWebrtcDetails] = useState<any | null>(null);
-  const REGISTER_SESSION_URL =
-    "https://us-central1-madlibs-408303.cloudfunctions.net/register-session";
-  const FAKE_WEBRTC = {
-    sdp: {
-      type: "offer",
-      sdp: "v=0\r\no=- 46108309 46108309 IN IP4 0.0.0.0\r\ns=-\r\nc=IN IP4 0.0.0.0\r\nt=0 0\r\na=ice-ufrag:sample\r\na=ice-pwd:samplepwd\r\na=fingerprint:sha-256 4A:AD:B9:B1:3F:82:18:3B:CE:2B:4F:80:35:46:D9:C0:C4:D8:AA:E1:6B:5B:61:2F:2F:3D:55:3D:2E:3F:49:11\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111 103 104 9 0 8 106 105 13 126\r\na=mid:audio0\r\n",
-    },
-    iceCandidates: [
-      {
-        candidate:
-          "candidate:842163049 1 udp 1686052607 1.2.3.4 46154 typ srflx raddr 0.0.0.0 rport 0 generation 0 ufrag sample network-id 3 network-cost 10",
-        sdpMid: "audio0",
-        sdpMLineIndex: 0,
-      },
-      {
-        candidate:
-          "candidate:842163049 2 udp 1686052606 1.2.3.4 46155 typ srflx raddr 0.0.0.0 rport 0 generation 0 ufrag sample network-id 3 network-cost 10",
-        sdpMid: "audio0",
-        sdpMLineIndex: 0,
-      },
-    ],
+  const [peer, setPeer] = useState<Peer | null>(null);
+
+  const getSessionIdFromPath = () => {
+    let params = new URLSearchParams(document.location.search);
+    const newSessionId = params.get("sessionId");
+    if (newSessionId) {
+      console.log(`Found sessionId ${newSessionId} in path.`);
+      setSessionId(newSessionId);
+    } else {
+      console.log("No sessionId found in path");
+    }
   };
 
-  // Function to register a new session
-  async function registerSession(webrtcDetails: any): Promise<string> {
-    setWebrtcDetails(FAKE_WEBRTC);
-    try {
-      const response = await fetch(REGISTER_SESSION_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(webrtcDetails),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      return data.sessionId;
-    } catch (error) {
-      console.error("Error registering session:", error);
-      throw error;
-    }
-  }
+  useEffect(() => {
+    getSessionIdFromPath();
+  }, []);
 
-  // Function to get session details
-  // async function getSession(sessionId: string): Promise<any> {
-  //   try {
-  //     const response = await fetch(`${REGISTER_SESSION_URL}/${sessionId}`);
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! status: ${response.status}`);
-  //     }
-  //     return response.json();
-  //   } catch (error) {
-  //     console.error("Error getting session:", error);
-  //     throw error;
-  //   }
-  // }
+  useEffect(() => {
+    if (sessionId) {
+      console.log(`Creating peer for sessionId ${sessionId}`);
+      createPeer();
+    }
+  }, [sessionId]);
+
+  useEffect(() => {
+    if (peer?.id) {
+      console.log("Session created with ID:", peer.id);
+      if (sessionId) {
+        console.log(`Connecting to session ${sessionId}`);
+        const conn = peer.connect(sessionId);
+        conn.on("open", function () {
+          console.log("Connection Established!");
+        });
+      }
+    }
+  }, [peer]);
+
+  const createPeer = () => {
+    if (peer) return peer;
+    const newSessionId = uuidv4();
+    const SERVER_URI = "https://madlibs-server-xxnwdd2lpq-uc.a.run.app";
+    const SERVER_KEY = "d41d8cd98f00b204e9800998ecf8427e";
+    const SERVER_CONNECTION = {
+      host: SERVER_URI,
+      port: 443,
+      ping: 1000 * 15, // 15s ping
+      secure: true,
+      debug: 2,
+      key: SERVER_KEY,
+    };
+    const newPeer = new Peer(newSessionId, SERVER_CONNECTION);
+    newPeer.on("open", (id) => {
+      console.log(`My peer ID is ${id}`);
+    });
+    setPeer(newPeer);
+  };
 
   const handleCollaborateClick = async () => {
     try {
-      const newSessionId = await registerSession(webrtcDetails);
-      setSessionId(newSessionId);
-      console.log("Session created with ID:", newSessionId);
+      createPeer();
     } catch (error) {
       console.error("Failed to create session:", error);
     }
@@ -202,15 +200,17 @@ function App() {
   // Check conditions for enabling the "Upload Player Words" input
   const canUploadPlayerWords = templateFields.length > 0;
 
+  const getId = (): string | undefined => {
+    return sessionId ? sessionId : peer?.id;
+  };
+
   return (
     <>
       <h1>Madlibs Generator</h1>
-      {sessionId ? (
+      {getId() ? (
         <div>
           Session:{" "}
-          <a href="https://2ajoyce.github.io/madlibs-generator/{sessionId}">
-            2ajoyce.github.io/madlibs-generator/{sessionId}
-          </a>
+          <a href={`${window.location.href}?sessionId=${getId()}`}>{getId()}</a>
         </div>
       ) : (
         <button onClick={handleCollaborateClick}>Collaborate</button>
