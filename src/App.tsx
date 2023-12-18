@@ -45,8 +45,17 @@ function App() {
       if (sessionId) {
         console.log(`Connecting to session ${sessionId}`);
         const conn = peer.connect(sessionId);
-        conn.on("open", function () {
+        conn.on("open", () => {
           console.log("Connection Established!");
+          conn.on("data", function (data) {
+            console.log("Received", data);
+          });
+
+          conn.send("Hello!");
+        });
+
+        conn.on("error", (err) => {
+          console.log("Connection Error: ", err);
         });
       }
     }
@@ -68,6 +77,10 @@ function App() {
     const newPeer = new Peer(newSessionId, SERVER_CONNECTION);
     newPeer.on("open", (id) => {
       console.log(`My peer ID is ${id}`);
+    });
+    newPeer.on("connection", (conn) => {
+      console.log(`Incoming connection with ${conn.connectionId}`);
+      conn.send("Hello!");
     });
     setPeer(newPeer);
   };
