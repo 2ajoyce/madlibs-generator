@@ -16,7 +16,7 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({
   return (
     <>
       {getId() ? (
-        <div>
+        <div className="button-container">
           Session:{" "}
           <a href={`${window.location.href}?sessionId=${getId()}`}>{getId()}</a>
         </div>

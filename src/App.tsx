@@ -23,7 +23,8 @@ function App() {
   // sessionId is intended to store the parent session. Current session can be retrieved from peer.id
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [peerId, setPeerId] = useState<string | null>(null);
-  let peerManager: PeerManager | null = null;
+
+  let peerManager: PeerManager = PeerManager.getInstance();
 
   const getSessionIdFromPath = () => {
     let params = new URLSearchParams(document.location.search);
@@ -41,22 +42,25 @@ function App() {
   }, []);
 
   const createPeer = (sessionId?: string) => {
-    peerManager = PeerManager.getInstance();
-    peerManager.createPeer(sessionId);
-    setPeerId(peerManager.peer ? peerManager.peer?.id : null);
-
+    peerManager.createPeer((peerId) => {
+      setPeerId(peerId);
+      if (sessionId) {
+        peerManager.connectToPeer(sessionId, () => {
+          peerManager.sendToPeer(sessionId, "Hello, peer!");
+        });
+      }
+    });
     return () => {
-      peerManager?.destroyPeer();
+      peerManager.destroyPeer();
     };
   };
 
   useEffect(() => {
-    if (sessionId) {
-      createPeer(sessionId);
-    }
+    if (sessionId) createPeer(sessionId);
   }, [sessionId]);
 
   const handleCollaborateClick = async () => {
+    window.alert("This feature is still under active development");
     try {
       createPeer();
     } catch (error) {
