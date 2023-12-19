@@ -3,6 +3,14 @@ import { ChangeEvent, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import * as XLSX from "xlsx";
 import "./App.css";
+import FileUpload from "./FileUpload";
+import InputFields from "./InputFields";
+import SessionDisplay from "./SessionDisplay";
+import { processTemplateFile } from "./file_processing/txt";
+import {
+  createSpreadsheetData,
+  processUploadedFile,
+} from "./file_processing/xlsx";
 
 type Inputs = {
   [key: string]: string;
@@ -116,59 +124,38 @@ function App() {
 
   const handleTemplateUpload = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files?.length === 1) {
-      const fileReader = new FileReader();
-      fileReader.onload = (e) => {
-        // Parse the file content to extract the placeholders and save the template
-        const result = e.target!.result;
-        if (typeof result === "string") {
-          setTemplate(result); // Save the entire template content
-          const fields = result.match(/{(.*?)}/g);
-          if (fields) {
-            // Remove duplicates by converting the list to a Set and then back to an array
-            const uniqueFields = Array.from(
-              new Set(fields.map((field: string) => field.replace(/[{}]/g, "")))
-            );
-            setTemplateFields(uniqueFields);
-          }
-          // Reset inputs
-        }
-      };
-      fileReader.readAsText(event.target.files[0]);
+      processTemplateFile(event.target.files[0])
+        .then(({ template, fields }) => {
+          setTemplate(template); // Update template in state
+          setTemplateFields(fields); // Update template fields in state
+          // Reset inputs or perform any additional state updates
+        })
+        .catch((error) => {
+          console.error("Error processing file:", error);
+        });
     }
   };
 
   const handlePlayerWordsUpload = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files?.length === 1) {
-      const fileReader = new FileReader();
-      fileReader.onload = (e) => {
-        const arrayBuffer = e.target!.result;
-        const workbook = XLSX.read(arrayBuffer, { type: "array" });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        // Explicitly declare that each row is an array of any type
-        const data: Array<any[]> = XLSX.utils.sheet_to_json(worksheet, {
-          header: 1,
-          blankrows: false,
-          defval: null,
+      processUploadedFile(event.target.files[0])
+        .then((data) => {
+          const newData = Object.keys(data).reduce<{ [key: string]: string }>(
+            (acc, id) => {
+              const formattedId = id.replace(/\s+/g, "-").toLowerCase();
+              if (templateFields.includes(formattedId)) {
+                acc[formattedId] = data[id];
+              }
+              return acc;
+            },
+            {}
+          );
+
+          setInputs(newData);
+        })
+        .catch((error) => {
+          console.error("Error processing file:", error);
         });
-
-        // Skip the header row and start processing from the second row
-        const newData = data
-          .slice(1)
-          .reduce<{ [key: string]: string }>((acc, row) => {
-            const [id, , playerInput] = row.map(String); // Convert all elements to strings
-            // Convert ID back to the format used in templateFields if necessary
-            const formattedId = id.replace(/\s+/g, "-").toLowerCase();
-            if (templateFields.includes(formattedId)) {
-              acc[formattedId] = playerInput;
-            }
-            return acc;
-          }, {});
-
-        setInputs(newData);
-      };
-
-      fileReader.readAsArrayBuffer(event.target.files[0]);
     }
   };
 
@@ -196,23 +183,7 @@ function App() {
   };
 
   const generateSpreadsheet = () => {
-    const workbook = XLSX.utils.book_new();
-    const sheetName = "Madlibs Input";
-    const ws_data = [["ID", "Type of Word", "Input"]];
-    const ws = XLSX.utils.aoa_to_sheet(ws_data);
-
-    templateFields.forEach((field) => {
-      const id = field;
-      const typeOfWord = field
-        .split("-")
-        .slice(0, -1)
-        .join(" ")
-        .replace(/^\w/, (c) => c.toUpperCase());
-      const newRow = [id, typeOfWord, ""];
-      XLSX.utils.sheet_add_aoa(ws, [newRow], { origin: -1 });
-    });
-
-    XLSX.utils.book_append_sheet(workbook, ws, sheetName);
+    const workbook = createSpreadsheetData(templateFields);
 
     // Generate Excel file
     XLSX.writeFile(workbook, "madlibs_input.xlsx");
@@ -234,48 +205,28 @@ function App() {
   // Check conditions for enabling the "Upload Player Words" input
   const canUploadPlayerWords = templateFields.length > 0;
 
-  const getId = (): string | undefined => {
-    return sessionId ? sessionId : peer?.id;
-  };
-
   return (
     <>
       <h1>Madlibs Generator</h1>
-      {getId() ? (
-        <div>
-          Session:{" "}
-          <a href={`${window.location.href}?sessionId=${getId()}`}>{getId()}</a>
-        </div>
-      ) : (
-        <button onClick={handleCollaborateClick}>Collaborate</button>
-      )}
+      <SessionDisplay
+        sessionId={sessionId}
+        peerId={peer ? peer.id : null}
+        handleCollaborateClick={handleCollaborateClick}
+      />
       <div className="upload-container">
-        <div className="upload-box">
-          <label htmlFor="template-upload">Upload Story Template:</label>
-          <span
-            className="info-icon"
-            title="Use curly braces {} to indicate placeholders in the template. For example, {noun}, {verb}, {adjective}."
-          >
-            &#9432;
-          </span>
-          <input
-            type="file"
-            id="template-upload"
-            onChange={handleTemplateUpload}
-          />
-        </div>
-        <div className="upload-box">
-          <label htmlFor="words-upload">Upload Player Words:</label>
-          <input
-            type="file"
-            id="words-upload"
-            onChange={handlePlayerWordsUpload}
-            disabled={!canUploadPlayerWords}
-          />
-        </div>
+        <FileUpload
+          label="Upload Story Template"
+          onChange={handleTemplateUpload}
+          infoText="Use curly braces {} to indicate placeholders in the template. For example, {noun}, {verb}, {adjective}."
+        />
+        <FileUpload
+          label="Upload Player Words"
+          onChange={handlePlayerWordsUpload}
+          disabled={!canUploadPlayerWords}
+        />
       </div>
       <div className="card">
-        <div className="generate-spreadsheet-container">
+        <div className="button-container">
           <button
             onClick={generateSpreadsheet}
             disabled={!canGenerateSpreadsheet}
@@ -283,16 +234,13 @@ function App() {
             Generate Spreadsheet
           </button>
         </div>
-        {templateFields.map((field, index) => (
-          <input
-            key={index}
-            type="text"
-            name={sanitizeField(field)}
-            placeholder={formatPlaceholder(field)}
-            value={inputs[field] || ""}
-            onChange={(e) => handleInputChange(field, e.target.value)}
-          />
-        ))}
+        <InputFields
+          templateFields={templateFields}
+          inputs={inputs}
+          handleInputChange={handleInputChange}
+          sanitizeField={sanitizeField}
+          formatPlaceholder={formatPlaceholder}
+        />
       </div>
       <div className="button-container">
         <button onClick={generateStory} disabled={!canGenerateStory}>

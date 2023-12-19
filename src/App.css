@@ -37,17 +37,21 @@ input[type="text"] {
 .upload-container {
   display: flex;
   justify-content: space-between;
-  padding: 1em;
 }
 
 /* Individual upload boxes */
 .upload-box {
   flex: 1; /* Each box takes up half the space */
   padding: 1em;
-  margin: 0.5em;
   border: 1px solid #ddd;
   border-radius: 8px;
   text-align: left;
+}
+.upload-box:first-of-type {
+  margin-right: 0.5em;
+}
+.upload-box:nth-of-type(2) {
+  margin-left: 0.5em;
 }
 
 input[type="file"] {
@@ -61,19 +65,14 @@ input[type="file"] {
   cursor: help;
 }
 
-.button-container {
-  text-align: center;
-  margin-top: 1em;
-}
-
 .story-output {
   margin-top: 1em;
   text-align: center;
 }
 
-.generate-spreadsheet-container {
+.button-container {
   text-align: center;
-  margin-bottom: 1em;
+  margin: 1em 0 1em;
 }
 
 .story-output {
