@@ -1,30 +1,18 @@
-import { Peer } from "peerjs";
 import { ChangeEvent, useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 import * as XLSX from "xlsx";
 import "./App.css";
 import FileUpload from "./FileUpload";
 import InputFields from "./InputFields";
+import PeerManager from "./PeerManager";
 import SessionDisplay from "./SessionDisplay";
-import { processTemplateFile } from "./file_processing/txt";
+import { processTemplateFile } from "./file_processing/txt_files";
 import {
   createSpreadsheetData,
   processUploadedFile,
-} from "./file_processing/xlsx";
+} from "./file_processing/xlsx_files";
 
 type Inputs = {
   [key: string]: string;
-};
-
-const SERVER_URI = "madlibs-server-xxnwdd2lpq-uc.a.run.app";
-const SERVER_KEY = "d41d8cd98f00b204e9800998ecf8427e";
-const SERVER_CONNECTION = {
-  host: SERVER_URI,
-  port: 443,
-  ping: 1000 * 15, // 15s ping
-  secure: true,
-  debug: 2,
-  key: SERVER_KEY,
 };
 
 function App() {
@@ -34,7 +22,8 @@ function App() {
   const [story, setStory] = useState("");
   // sessionId is intended to store the parent session. Current session can be retrieved from peer.id
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [peer, setPeer] = useState<Peer | null>(null);
+  const [peerId, setPeerId] = useState<string | null>(null);
+  let peerManager: PeerManager | null = null;
 
   const getSessionIdFromPath = () => {
     let params = new URLSearchParams(document.location.search);
@@ -51,68 +40,21 @@ function App() {
     getSessionIdFromPath();
   }, []);
 
+  const createPeer = (sessionId?: string) => {
+    peerManager = PeerManager.getInstance();
+    peerManager.createPeer(sessionId);
+    setPeerId(peerManager.peer ? peerManager.peer?.id : null);
+
+    return () => {
+      peerManager?.destroyPeer();
+    };
+  };
+
   useEffect(() => {
     if (sessionId) {
-      console.log(`Creating peer to join existing session: ${sessionId}`);
-      createPeer();
+      createPeer(sessionId);
     }
   }, [sessionId]);
-
-  useEffect(() => {
-    if (peer?.id) {
-      console.log("Peer created with ID:", peer.id);
-      peer.on("error", (err) => {
-        console.log("Error: ", err);
-      });
-      if (sessionId) {
-        // If this is connection to a session
-        console.log(`Connecting to session ${sessionId}`);
-        const conn = peer.connect(sessionId);
-        conn.on("open", () => {
-          console.log("Connection Established!");
-          conn.on("data", function (data) {
-            console.log("Received", data);
-          });
-          conn.send("Hello!");
-        });
-
-        conn.on("error", (err) => {
-          console.log("Connection Error: ", err);
-        });
-      } else {
-        // If this is hosting a session
-        peer.on("open", (id) => {
-          console.log(`My peer ID is ${id}`);
-        });
-        peer.on("connection", (conn) => {
-          console.log(`Incoming connection with ${conn.connectionId}`);
-          conn.on("open", () => {
-            console.log("Connection Established!");
-            conn.on("data", function (data) {
-              console.log("Received", data);
-            });
-            conn.send("Hello!");
-          });
-
-          conn.on("error", (err) => {
-            console.log("Connection Error: ", err);
-          });
-        });
-      }
-    }
-  }, [peer]);
-
-  const createPeer = () => {
-    if (peer) {
-      console.log(`Reusing existing peer ${peer.id}`);
-      return peer;
-    } else {
-      console.log("Creating new peer");
-      const newSessionId = uuidv4();
-      const newPeer = new Peer(newSessionId, SERVER_CONNECTION);
-      setPeer(newPeer);
-    }
-  };
 
   const handleCollaborateClick = async () => {
     try {
@@ -210,7 +152,7 @@ function App() {
       <h1>Madlibs Generator</h1>
       <SessionDisplay
         sessionId={sessionId}
-        peerId={peer ? peer.id : null}
+        peerId={peerId}
         handleCollaborateClick={handleCollaborateClick}
       />
       <div className="upload-container">
