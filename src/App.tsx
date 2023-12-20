@@ -5,11 +5,12 @@ import FileUpload from "./FileUpload";
 import InputFields from "./InputFields";
 import PeerManager from "./PeerManager";
 import SessionDisplay from "./SessionDisplay";
-import { processTemplateFile } from "./file_processing/txt_files";
+import TemplateInput from "./TemplateInput";
 import {
-  createSpreadsheetData,
-  processUploadedFile,
-} from "./file_processing/xlsx_files";
+  extractTemplateFields,
+  processTemplateFile,
+} from "./file_processing/txt_files";
+import { createSpreadsheetData } from "./file_processing/xlsx_files";
 
 type Inputs = {
   [key: string]: string;
@@ -82,26 +83,29 @@ function App() {
     }
   };
 
-  const handlePlayerWordsUpload = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files?.length === 1) {
-      processUploadedFile(event.target.files[0])
-        .then((data) => {
-          const newData = Object.keys(data).reduce<{ [key: string]: string }>(
-            (acc, id) => {
-              const formattedId = id.replace(/\s+/g, "-").toLowerCase();
-              if (templateFields.includes(formattedId)) {
-                acc[formattedId] = data[id];
-              }
-              return acc;
-            },
-            {}
-          );
+  const handleManualTemplateInput = (
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const newTemplate = event.target.value;
+    setTemplate(newTemplate);
+    const fields = extractTemplateFields(newTemplate);
+    setTemplateFields(fields);
+  };
 
-          setInputs(newData);
-        })
-        .catch((error) => {
-          console.error("Error processing file:", error);
-        });
+  const handlePlayerWordsUpload = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (event.target.files?.length === 1) {
+      const fileReader = new FileReader();
+      fileReader.onload = (e) => {
+        const fileContent = e.target?.result;
+        if (typeof fileContent === "string") {
+          setTemplate(fileContent);
+          const fields = extractTemplateFields(fileContent);
+          setTemplateFields(fields);
+        }
+      };
+      fileReader.readAsText(event.target.files[0]);
     }
   };
 
@@ -160,11 +164,18 @@ function App() {
         handleCollaborateClick={handleCollaborateClick}
       />
       <div className="upload-container">
-        <FileUpload
-          label="Upload Story Template"
-          onChange={handleTemplateUpload}
+        <TemplateInput
+          onFileUpload={handleTemplateUpload}
+          onManualInput={handleManualTemplateInput}
+          template={template}
           infoText="Use curly braces {} to indicate placeholders in the template. For example, {noun}, {verb}, {adjective}."
         />
+        <button
+          onClick={generateSpreadsheet}
+          disabled={!canGenerateSpreadsheet}
+        >
+          Generate Spreadsheet
+        </button>
         <FileUpload
           label="Upload Player Words"
           onChange={handlePlayerWordsUpload}
@@ -173,20 +184,14 @@ function App() {
       </div>
       <div className="card">
         <div className="button-container">
-          <button
-            onClick={generateSpreadsheet}
-            disabled={!canGenerateSpreadsheet}
-          >
-            Generate Spreadsheet
-          </button>
+          <InputFields
+            templateFields={templateFields}
+            inputs={inputs}
+            handleInputChange={handleInputChange}
+            sanitizeField={sanitizeField}
+            formatPlaceholder={formatPlaceholder}
+          />
         </div>
-        <InputFields
-          templateFields={templateFields}
-          inputs={inputs}
-          handleInputChange={handleInputChange}
-          sanitizeField={sanitizeField}
-          formatPlaceholder={formatPlaceholder}
-        />
       </div>
       <div className="button-container">
         <button onClick={generateStory} disabled={!canGenerateStory}>

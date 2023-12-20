@@ -19,14 +19,6 @@
   border-radius: 8px; /* Rounded corners */
 }
 
-/* Style for input fields */
-input[type="text"] {
-  padding: 0.5em;
-  margin: 0.5em;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
 /* Simplified style for additional information text */
 .read-the-docs {
   color: #888;
@@ -36,22 +28,17 @@ input[type="text"] {
 /* Container for the file uploads */
 .upload-container {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
 }
 
 /* Individual upload boxes */
 .upload-box {
-  flex: 1; /* Each box takes up half the space */
+  width: calc(100%-1em);
   padding: 1em;
   border: 1px solid #ddd;
   border-radius: 8px;
   text-align: left;
-}
-.upload-box:first-of-type {
-  margin-right: 0.5em;
-}
-.upload-box:nth-of-type(2) {
-  margin-left: 0.5em;
+  margin: 0.5em 0;
 }
 
 input[type="file"] {
@@ -83,4 +70,13 @@ input[type="file"] {
   border: 1px solid #ddd;
   border-radius: 8px;
   max-width: 800px;
+}
+
+textarea {
+  min-height: 150px;
+  margin: 1em 0;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
