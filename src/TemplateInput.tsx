@@ -4,15 +4,19 @@ import FileUpload from "./FileUpload";
 type TemplateInputProps = {
   onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onManualInput: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  template: string;
+  inputData: string;
   infoText?: string;
+  fileInputLabel: string;
+  textAreaPlaceholder: string;
 };
 
 const TemplateInput: React.FC<TemplateInputProps> = ({
   onFileUpload,
   onManualInput,
-  template,
+  inputData,
   infoText,
+  fileInputLabel,
+  textAreaPlaceholder,
 }) => {
   const [useFileUpload, setUseFileUpload] = useState(false);
 
@@ -24,20 +28,20 @@ const TemplateInput: React.FC<TemplateInputProps> = ({
     <div className="upload-container">
       <div className="button-container">
         <button onClick={toggleInputMethod}>
-          {useFileUpload ? "Type Template Manually" : "Upload Template File"}
+          {useFileUpload ? "Type Manually" : "Upload File"}
         </button>
       </div>
       {useFileUpload ? (
         <FileUpload
-          label="Upload Story Template"
+          label={fileInputLabel}
           onChange={onFileUpload}
           infoText={infoText}
         />
       ) : (
         <textarea
-          value={template}
+          value={inputData}
           onChange={onManualInput}
-          placeholder="Type your template here..."
+          placeholder={textAreaPlaceholder}
         />
       )}
     </div>

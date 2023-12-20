@@ -19,6 +19,14 @@
   border-radius: 8px; /* Rounded corners */
 }
 
+/* Style for input fields */
+input[type="text"] {
+  padding: 0.5em;
+  margin: 0.5em;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
 /* Simplified style for additional information text */
 .read-the-docs {
   color: #888;

@@ -1,7 +1,6 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import "./App.css";
-import FileUpload from "./FileUpload";
 import InputFields from "./InputFields";
 import PeerManager from "./PeerManager";
 import SessionDisplay from "./SessionDisplay";
@@ -24,6 +23,7 @@ function App() {
   // sessionId is intended to store the parent session. Current session can be retrieved from peer.id
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [peerId, setPeerId] = useState<string | null>(null);
+  const [playerWords, setPlayerWords] = useState<string>("");
 
   let peerManager: PeerManager = PeerManager.getInstance();
 
@@ -155,6 +155,9 @@ function App() {
   // Check conditions for enabling the "Upload Player Words" input
   const canUploadPlayerWords = templateFields.length > 0;
 
+  const handleManualPlayerWordsInput = () =>
+    window.alert("This function needs to be defined");
+
   return (
     <>
       <h1>Madlibs Generator</h1>
@@ -167,31 +170,20 @@ function App() {
         <TemplateInput
           onFileUpload={handleTemplateUpload}
           onManualInput={handleManualTemplateInput}
-          template={template}
+          inputData={template}
+          fileInputLabel="Upload Story Template"
+          textAreaPlaceholder="Type your template here..."
           infoText="Use curly braces {} to indicate placeholders in the template. For example, {noun}, {verb}, {adjective}."
-        />
-        <button
-          onClick={generateSpreadsheet}
-          disabled={!canGenerateSpreadsheet}
-        >
-          Generate Spreadsheet
-        </button>
-        <FileUpload
-          label="Upload Player Words"
-          onChange={handlePlayerWordsUpload}
-          disabled={!canUploadPlayerWords}
         />
       </div>
       <div className="card">
-        <div className="button-container">
-          <InputFields
-            templateFields={templateFields}
-            inputs={inputs}
-            handleInputChange={handleInputChange}
-            sanitizeField={sanitizeField}
-            formatPlaceholder={formatPlaceholder}
-          />
-        </div>
+        <InputFields
+          templateFields={templateFields}
+          inputs={inputs}
+          handleInputChange={handleInputChange}
+          sanitizeField={sanitizeField}
+          formatPlaceholder={formatPlaceholder}
+        />
       </div>
       <div className="button-container">
         <button onClick={generateStory} disabled={!canGenerateStory}>
