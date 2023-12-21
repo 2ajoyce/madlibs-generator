@@ -37,5 +37,5 @@ jobs:
       uses: 'google-github-actions/setup-gcloud@v2'
 
     - name: Upload to Google Cloud Storage
-      run: gsutil -m rsync -r dist gs://${{ secrets.GCS_BUCKET }}
+      run: gsutil -m rsync -r dist gs://${{ secrets.GCP_BUCKET_NAME }}
 
