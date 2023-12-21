@@ -41,7 +41,7 @@ input[type="text"] {
 
 /* Individual upload boxes */
 .upload-box {
-  width: calc(100%-1em);
+  width: calc(100% - 1em);
   padding: 1em;
   border: 1px solid #ddd;
   border-radius: 8px;

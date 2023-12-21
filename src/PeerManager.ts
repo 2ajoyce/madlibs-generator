@@ -1,7 +1,7 @@
 import Peer, { DataConnection } from "peerjs";
 import { v4 as uuidv4 } from "uuid";
 
-const SERVER_URI = "madlibs-server-xxnwdd2lpq-uc.a.run.app";
+const SERVER_URI = "p2p.2ajoyce.com";
 const SERVER_KEY = "d41d8cd98f00b204e9800998ecf8427e";
 const SERVER_CONNECTION = {
   host: SERVER_URI,
