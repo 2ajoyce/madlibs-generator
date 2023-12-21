@@ -9,6 +9,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -23,13 +27,15 @@ jobs:
 
     - name: Build
       run: npm run build
-
-    - name: Install Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v0
+    
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v2'
       with:
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
-        service_account_key: ${{ secrets.GCP_SA_KEY }}
-        export_default_credentials: true
+        credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v2'
 
     - name: Upload to Google Cloud Storage
       run: gsutil -m rsync -r dist gs://${{ secrets.GCS_BUCKET }}
+
