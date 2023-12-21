@@ -1,5 +1,4 @@
 import { ChangeEvent, useEffect, useState } from "react";
-import * as XLSX from "xlsx";
 import "./App.css";
 import InputFields from "./InputFields";
 import PeerManager from "./PeerManager";
@@ -9,7 +8,6 @@ import {
   extractTemplateFields,
   processTemplateFile,
 } from "./file_processing/txt_files";
-import { createSpreadsheetData } from "./file_processing/xlsx_files";
 
 type Inputs = {
   [key: string]: string;
@@ -23,7 +21,6 @@ function App() {
   // sessionId is intended to store the parent session. Current session can be retrieved from peer.id
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [peerId, setPeerId] = useState<string | null>(null);
-  const [playerWords, setPlayerWords] = useState<string>("");
 
   let peerManager: PeerManager = PeerManager.getInstance();
 
@@ -92,23 +89,6 @@ function App() {
     setTemplateFields(fields);
   };
 
-  const handlePlayerWordsUpload = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (event.target.files?.length === 1) {
-      const fileReader = new FileReader();
-      fileReader.onload = (e) => {
-        const fileContent = e.target?.result;
-        if (typeof fileContent === "string") {
-          setTemplate(fileContent);
-          const fields = extractTemplateFields(fileContent);
-          setTemplateFields(fields);
-        }
-      };
-      fileReader.readAsText(event.target.files[0]);
-    }
-  };
-
   // Function to convert placeholder id to a more readable format
   const formatPlaceholder = (id: string) => {
     return id
@@ -132,31 +112,15 @@ function App() {
     setStory(storyTemplate);
   };
 
-  const generateSpreadsheet = () => {
-    const workbook = createSpreadsheetData(templateFields);
-
-    // Generate Excel file
-    XLSX.writeFile(workbook, "madlibs_input.xlsx");
-  };
-
   const sanitizeField = (field: string) => {
     return field.replace(/[^a-zA-Z0-9-_]/g, "");
   };
-
-  // Check conditions for enabling the "Generate Spreadsheet" button
-  const canGenerateSpreadsheet = templateFields.length > 0;
 
   // Check conditions for enabling the "Generate Story" button
   const canGenerateStory =
     templateFields.length > 0 &&
     Object.keys(inputs).length === templateFields.length &&
     Object.values(inputs).every((value) => value.trim() !== "");
-
-  // Check conditions for enabling the "Upload Player Words" input
-  const canUploadPlayerWords = templateFields.length > 0;
-
-  const handleManualPlayerWordsInput = () =>
-    window.alert("This function needs to be defined");
 
   return (
     <>
