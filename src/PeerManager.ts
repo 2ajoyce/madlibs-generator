@@ -96,7 +96,7 @@ class PeerManager {
   }
 
   public destroyPeer (): void {
-    if (this.peer) {
+    if (this.peer != null) {
       this.peer.destroy()
       this.peer = null
     }
