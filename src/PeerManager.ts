@@ -16,9 +16,9 @@ class PeerManager {
     public peer: Peer | null = null
     private connections: Record<string, DataConnection> = {}
 
-    private constructor() {}
+    private constructor () {}
 
-    public static getInstance(): PeerManager {
+    public static getInstance (): PeerManager {
         // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
         if (!PeerManager.instance) {
             PeerManager.instance = new PeerManager()
@@ -26,7 +26,7 @@ class PeerManager {
         return PeerManager.instance
     }
 
-    public createPeer(callback?: (peerId: string) => void): void {
+    public createPeer (callback?: (peerId: string) => void): void {
         if (this.peer == null) {
             const id = uuidv4()
             this.peer = new Peer(id, SERVER_CONNECTION)
@@ -61,7 +61,7 @@ class PeerManager {
         }
     }
 
-    public connectToPeer(peerId: string, callback?: () => void): void {
+    public connectToPeer (peerId: string, callback?: () => void): void {
         if (this.peer == null) {
             console.error('Peer is not initialized')
             return
@@ -86,7 +86,7 @@ class PeerManager {
         })
     }
 
-    public sendToPeer(peerId: string, message: any): void | Promise<void> {
+    public sendToPeer (peerId: string, message: any): void | Promise<void> {
         // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
         if (this.connections[peerId]) {
             return this.connections[peerId].send(message)
@@ -95,7 +95,7 @@ class PeerManager {
         }
     }
 
-    public destroyPeer(): void {
+    public destroyPeer (): void {
         if (this.peer != null) {
             this.peer.destroy()
             this.peer = null
