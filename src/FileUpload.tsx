@@ -1,19 +1,19 @@
-import React from "react";
+import React from 'react'
 
-type FileUploadProps = {
-  label: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  disabled?: boolean;
-  infoText?: string;
-};
+interface FileUploadProps {
+  label: string
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  disabled?: boolean
+  infoText?: string
+}
 
 const FileUpload: React.FC<FileUploadProps> = ({
   label,
   onChange,
   disabled = false,
-  infoText,
+  infoText
 }) => {
-  const id = label.toLowerCase().replace(/\s+/g, "-");
+  const id = label.toLowerCase().replace(/\s+/g, '-')
 
   return (
     <div className="upload-box">
@@ -33,7 +33,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
         disabled={disabled}
       />
     </div>
-  );
-};
+  )
+}
 
-export default FileUpload;
+export default FileUpload

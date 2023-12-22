@@ -1,19 +1,19 @@
-import React from "react";
+import React from 'react'
 
-type InputFieldsProps = {
-  templateFields: string[];
-  inputs: { [key: string]: string };
-  handleInputChange: (name: string, value: string) => void;
-  sanitizeField: (field: string) => string;
-  formatPlaceholder: (id: string) => string;
-};
+interface InputFieldsProps {
+  templateFields: string[]
+  inputs: Record<string, string>
+  handleInputChange: (name: string, value: string) => void
+  sanitizeField: (field: string) => string
+  formatPlaceholder: (id: string) => string
+}
 
 const InputFields: React.FC<InputFieldsProps> = ({
   templateFields,
   inputs,
   handleInputChange,
   sanitizeField,
-  formatPlaceholder,
+  formatPlaceholder
 }) => {
   return (
     <>
@@ -23,12 +23,12 @@ const InputFields: React.FC<InputFieldsProps> = ({
           type="text"
           name={sanitizeField(field)}
           placeholder={formatPlaceholder(field)}
-          value={inputs[field] || ""}
-          onChange={(e) => handleInputChange(field, e.target.value)}
+          value={inputs[field] || ''}
+          onChange={(e) => { handleInputChange(field, e.target.value) }}
         />
       ))}
     </>
-  );
-};
+  )
+}
 
-export default InputFields;
+export default InputFields

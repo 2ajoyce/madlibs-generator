@@ -1,32 +1,34 @@
-import React from "react";
+import React from 'react'
 
-type SessionDisplayProps = {
-  sessionId: string | null;
-  peerId: string | null;
-  handleCollaborateClick: () => void;
-};
+interface SessionDisplayProps {
+  sessionId: string | null
+  peerId: string | null
+  handleCollaborateClick: () => void
+}
 
 const SessionDisplay: React.FC<SessionDisplayProps> = ({
   sessionId,
   peerId,
-  handleCollaborateClick,
+  handleCollaborateClick
 }) => {
-  const getId = () => sessionId || peerId;
+  const getId = () => sessionId || peerId
 
   return (
     <>
-      {getId() ? (
+      {getId()
+        ? (
         <div className="button-container">
-          Session:{" "}
+          Session:{' '}
           <a href={`${window.location.href}?sessionId=${getId()}`}>{getId()}</a>
         </div>
-      ) : (
+          )
+        : (
         <div className="button-container">
           <button onClick={handleCollaborateClick}>Collaborate</button>
         </div>
-      )}
+          )}
     </>
-  );
-};
+  )
+}
 
-export default SessionDisplay;
+export default SessionDisplay
