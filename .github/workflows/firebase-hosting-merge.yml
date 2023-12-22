@@ -3,19 +3,28 @@
 
 name: Deploy to Firebase Hosting on merge
 'on':
-  push:
-    branches:
-      - main
+    push:
+        branches:
+            - main
 jobs:
-  build_and_deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: npm install
-      - run: npm run build
-      - uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_MADLIBS_408303 }}'
-          channelId: live
-          projectId: madlibs-408303
+    build_and_deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Install Dependancies
+              run: npm install
+
+            - name: Build Application
+              run: npm run build
+              env:
+                  P2P_SERVER_URI: ${{ secrets.P2P_SERVER_URI }}
+                  P2P_SERVER_KEY: ${{ secrets.P2P_SERVER_KEY }}
+
+            - name: Deploy Application
+              uses: FirebaseExtended/action-hosting-deploy@v0
+              with:
+                  repoToken: '${{ secrets.GITHUB_TOKEN }}'
+                  firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_MADLIBS_408303 }}'
+                  channelId: live
+                  projectId: madlibs-408303
