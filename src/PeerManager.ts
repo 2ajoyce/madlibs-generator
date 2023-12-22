@@ -19,6 +19,7 @@ class PeerManager {
   private constructor () {}
 
   public static getInstance (): PeerManager {
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (!PeerManager.instance) {
       PeerManager.instance = new PeerManager()
     }
@@ -26,34 +27,42 @@ class PeerManager {
   }
 
   public createPeer (callback?: (peerId: string) => void): void {
-    if (!this.peer) {
+    if (this.peer == null) {
       const id = uuidv4()
       this.peer = new Peer(id, SERVER_CONNECTION)
 
       this.peer.on('open', () => {
         console.log('Created Peer: ', this.peer?.id)
-        if (callback && this.peer) {
+        if (callback != null && this.peer != null) {
           callback(this.peer.id)
         }
       })
 
-      this.peer.on('error', (err) => { console.error('Peer error:', err) })
+      this.peer.on('error', (err) => {
+        console.error('Peer error:', err)
+      })
       this.peer.on('connection', (conn) => {
         console.log(`Incoming connection from: ${conn.connectionId}`)
-        conn.on('open', () => { console.log('Connection established') })
-        conn.on('data', (data) => { console.log('Received data:', data) })
-        conn.on('error', (err) => { console.error('Connection error:', err) })
+        conn.on('open', () => {
+          console.log('Connection established')
+        })
+        conn.on('data', (data) => {
+          console.log('Received data:', data)
+        })
+        conn.on('error', (err) => {
+          console.error('Connection error:', err)
+        })
       })
     } else {
       console.log('Reusing existing Peer: ', this.peer.id)
-      if (callback && this.peer) {
+      if (callback != null) {
         callback(this.peer.id)
       }
     }
   }
 
   public connectToPeer (peerId: string, callback?: () => void): void {
-    if (!this.peer) {
+    if (this.peer == null) {
       console.error('Peer is not initialized')
       return
     }
@@ -62,18 +71,25 @@ class PeerManager {
     conn.on('open', () => {
       console.log('Connection established with: ', peerId)
       this.connections[peerId] = conn
-      if (callback) {
+      if (callback != null) {
         callback()
       }
     })
-    conn.on('error', (err) => { console.log('Connection error:', err) })
-    conn.on('close', () => { console.log('Connection closed') })
-    conn.on('iceStateChanged', () => { console.log('Ice State Changed') })
+    conn.on('error', (err) => {
+      console.log('Connection error:', err)
+    })
+    conn.on('close', () => {
+      console.log('Connection closed')
+    })
+    conn.on('iceStateChanged', () => {
+      console.log('Ice State Changed')
+    })
   }
 
-  public sendToPeer (peerId: string, message: any): void {
+  public sendToPeer (peerId: string, message: any): void | Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (this.connections[peerId]) {
-      this.connections[peerId].send(message)
+      return this.connections[peerId].send(message)
     } else {
       console.error('No connection found for the given peerId')
     }
