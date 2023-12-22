@@ -14,18 +14,16 @@ const FileUpload: React.FC<FileUploadProps> = ({
     infoText,
 }) => {
     const id = label.toLowerCase().replace(/\s+/g, '-')
+    const infoIconComponent = (
+        <span className="info-icon" title={infoText}>
+            &#9432;
+        </span>
+    )
 
     return (
         <div className="upload-box">
             <label htmlFor={id}>{label}:</label>
-            {infoText && (
-                <span
-                    className="info-icon"
-                    title={infoText}
-                >
-          &#9432;
-                </span>
-            )}
+            {infoText != null && infoIconComponent}
             <input
                 type="file"
                 id={id}

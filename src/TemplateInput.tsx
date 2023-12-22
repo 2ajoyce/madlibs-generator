@@ -20,9 +20,24 @@ const TemplateInput: React.FC<TemplateInputProps> = ({
 }) => {
     const [useFileUpload, setUseFileUpload] = useState(false)
 
-    const toggleInputMethod = () => {
+    const toggleInputMethod = (): void => {
         setUseFileUpload(!useFileUpload)
     }
+
+    const fileUploadComponent = (
+        <FileUpload
+            label={fileInputLabel}
+            onChange={onFileUpload}
+            infoText={infoText}
+        />
+    )
+    const textInputComponent = (
+        <textarea
+            value={inputData}
+            onChange={onManualInput}
+            placeholder={textAreaPlaceholder}
+        />
+    )
 
     return (
         <div className="upload-container">
@@ -31,21 +46,7 @@ const TemplateInput: React.FC<TemplateInputProps> = ({
                     {useFileUpload ? 'Type Manually' : 'Upload File'}
                 </button>
             </div>
-            {useFileUpload
-                ? (
-                    <FileUpload
-                        label={fileInputLabel}
-                        onChange={onFileUpload}
-                        infoText={infoText}
-                    />
-                )
-                : (
-                    <textarea
-                        value={inputData}
-                        onChange={onManualInput}
-                        placeholder={textAreaPlaceholder}
-                    />
-                )}
+            {useFileUpload ? fileUploadComponent : textInputComponent}
         </div>
     )
 }

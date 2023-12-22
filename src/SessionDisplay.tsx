@@ -11,23 +11,29 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({
     peerId,
     handleCollaborateClick,
 }) => {
-    const getId = () => sessionId || peerId
+    const getId = (): string => {
+        if (sessionId != null) return sessionId
+        else if (peerId != null) return peerId
+        else return ''
+    }
+
+    const sessionIdComponent = (
+        <div className="button-container">
+            Session:{' '}
+            <a href={`${window.location.href}?sessionId=${getId()}`}>
+                {getId()}
+            </a>
+        </div>
+    )
+
+    const collaborationBttnComponent = (
+        <div className="button-container">
+            <button onClick={handleCollaborateClick}>Collaborate</button>
+        </div>
+    )
 
     return (
-        <>
-            {getId()
-                ? (
-                    <div className="button-container">
-          Session:{' '}
-                        <a href={`${window.location.href}?sessionId=${getId()}`}>{getId()}</a>
-                    </div>
-                )
-                : (
-                    <div className="button-container">
-                        <button onClick={handleCollaborateClick}>Collaborate</button>
-                    </div>
-                )}
-        </>
+        <>{getId() !== '' ? sessionIdComponent : collaborationBttnComponent}</>
     )
 }
 

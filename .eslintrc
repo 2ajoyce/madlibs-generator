@@ -12,6 +12,28 @@
     "rules": {
         "@typescript-eslint/quotes": [2, "single"],
         "@typescript-eslint/indent": [2, 4],
-        "@typescript-eslint/comma-dangle": [2, "always-multiline"]
+        "@typescript-eslint/comma-dangle": [2, "always-multiline"],
+        "@typescript-eslint/member-delimiter-style": [
+            2,
+            {
+                "multiline": {
+                    "delimiter": "none",
+                    "requireLast": true
+                },
+                "singleline": {
+                    "delimiter": "semi",
+                    "requireLast": false
+                }
+            }
+        ],
+        "@typescript-eslint/space-before-function-paren": [
+            2,
+            {
+                "anonymous": "never",
+                "named": "never",
+                "asyncArrow": "always"
+            }
+        ],
+        "react/react-in-jsx-scope": "off"
     }
 }

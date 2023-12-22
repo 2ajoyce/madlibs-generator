@@ -15,6 +15,13 @@ const InputFields: React.FC<InputFieldsProps> = ({
     sanitizeField,
     formatPlaceholder,
 }) => {
+    const getFieldValue = (field: string): string => {
+        if (field !== '') {
+            return inputs[field]
+        } else {
+            return ''
+        }
+    }
     return (
         <>
             {templateFields.map((field, index) => (
@@ -23,8 +30,10 @@ const InputFields: React.FC<InputFieldsProps> = ({
                     type="text"
                     name={sanitizeField(field)}
                     placeholder={formatPlaceholder(field)}
-                    value={inputs[field] || ''}
-                    onChange={(e) => { handleInputChange(field, e.target.value) }}
+                    value={getFieldValue(field)}
+                    onChange={(e) => {
+                        handleInputChange(field, e.target.value)
+                    }}
                 />
             ))}
         </>
