@@ -18,8 +18,8 @@ jobs:
             - name: Build Application
               run: npm run build
               env:
-                  P2P_SERVER_URI: ${{ secrets.P2P_SERVER_URI }}
-                  P2P_SERVER_KEY: ${{ secrets.P2P_SERVER_KEY }}
+                  VITE_P2P_SERVER_URI: ${{ secrets.P2P_SERVER_URI }}
+                  VITE_P2P_SERVER_KEY: ${{ secrets.P2P_SERVER_KEY }}
 
             - name: Deploy Application
               uses: FirebaseExtended/action-hosting-deploy@v0
