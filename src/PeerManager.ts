@@ -26,81 +26,107 @@ class PeerManager {
         return PeerManager.instance
     }
 
-    public createPeer(callback?: (peerId: string) => void): void {
-        if (this.peer == null) {
-            const id = uuidv4()
-            this.peer = new Peer(id, SERVER_CONNECTION)
-
-            this.peer.on('open', () => {
-                console.log('Created Peer: ', this.peer?.id)
-                if (callback != null && this.peer != null) {
-                    callback(this.peer.id)
-                }
-            })
-
-            this.peer.on('error', (err) => {
-                console.error('Peer error:', err)
-            })
-            this.peer.on('connection', (conn) => {
-                console.log(`Incoming connection from: ${conn.connectionId}`)
-                conn.on('open', () => {
-                    console.log('Connection established')
-                })
-                conn.on('data', (data) => {
-                    console.log('Received data:', data)
-                })
-                conn.on('error', (err) => {
-                    console.error('Connection error:', err)
-                })
-            })
-        } else {
-            console.log('Reusing existing Peer: ', this.peer.id)
-            if (callback != null) {
-                callback(this.peer.id)
+    public async createPeer(): Promise<void> {
+        await new Promise<void>((resolve, reject) => {
+            if (this.peer == null) {
+                const id = uuidv4()
+                this.peer = new Peer(id, SERVER_CONNECTION)
+                this.setupConnectionListeners(resolve, reject)
+            } else {
+                console.log('Reusing existing Peer: ', this.peer.id)
+                resolve()
             }
-        }
+        })
     }
 
-    public connectToPeer(peerId: string, callback?: () => void): void {
+    public async connectToPeer(peerId: string): Promise<void> {
+        await new Promise<void>((resolve, reject) => {
+            if (this.peer == null) {
+                console.error('Peer is not initialized')
+                reject(new Error('Peer is not initialized'))
+                return
+            }
+
+            const conn = this.peer.connect(peerId)
+            conn.on('open', () => {
+                console.log('Connection established with: ', peerId)
+                this.connections[peerId] = conn
+                resolve()
+            })
+            conn.on('error', (err) => {
+                console.error('Connection error:', err)
+                reject(err)
+            })
+            conn.on('close', () => {
+                console.log('Connection closed')
+            })
+            conn.on('iceStateChanged', () => {
+                console.log('Ice State Changed')
+            })
+        })
+    }
+
+    public async sendToPeer(peerId: string, message: any): Promise<void> {
+        await new Promise<void>((resolve, reject) => {
+            const connection = this.connections[peerId]
+            if (connection != null) {
+                resolve(connection.send(message))
+            } else {
+                console.error('No connection found for the given peerId')
+                reject(new Error('No connection found for the given peerId'))
+            }
+        })
+    }
+
+    public async destroyPeer(): Promise<void> {
+        await new Promise<void>((resolve) => {
+            if (this.peer != null) {
+                this.peer.destroy()
+                this.peer = null
+            }
+            this.connections = {}
+            resolve()
+        })
+    }
+
+    setupConnectionListeners(
+        resolve: (value: void | PromiseLike<void>) => void,
+        reject: (reason?: any) => void,
+    ): void {
         if (this.peer == null) {
             console.error('Peer is not initialized')
             return
         }
 
-        const conn = this.peer.connect(peerId)
-        conn.on('open', () => {
-            console.log('Connection established with: ', peerId)
-            this.connections[peerId] = conn
-            if (callback != null) {
-                callback()
+        this.peer.on('open', () => {
+            console.log('Created Peer: ', this.peer?.id)
+            if (this.peer != null) {
+                resolve()
+            } else {
+                reject(new Error('Peer is null after creation'))
             }
         })
-        conn.on('error', (err) => {
-            console.log('Connection error:', err)
-        })
-        conn.on('close', () => {
-            console.log('Connection closed')
-        })
-        conn.on('iceStateChanged', () => {
-            console.log('Ice State Changed')
-        })
-    }
 
-    public sendToPeer(peerId: string, message: any): void | Promise<void> {
-        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-        if (this.connections[peerId]) {
-            return this.connections[peerId].send(message)
-        } else {
-            console.error('No connection found for the given peerId')
-        }
-    }
+        this.peer.on('connection', (conn) => {
+            console.log(`Incoming connection from: ${conn.connectionId}`)
 
-    public destroyPeer(): void {
-        if (this.peer != null) {
-            this.peer.destroy()
-            this.peer = null
-        }
-        this.connections = {}
+            conn.on('open', () => {
+                console.log('Connection established')
+            })
+
+            conn.on('data', (data) => {
+                console.log('Received data:', data)
+            })
+
+            conn.on('error', (err) => {
+                console.error('Connection error:', err)
+            })
+        })
+
+        this.peer.on('error', (err) => {
+            console.error('Peer error:', err)
+            reject(err)
+        })
     }
 }
 

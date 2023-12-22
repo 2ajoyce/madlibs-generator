@@ -37,38 +37,44 @@ function App(): ReactElement {
         getSessionIdFromPath()
     }, [])
 
-    const createPeer = (sessionId?: string): (() => void) => {
-        peerManager.createPeer((peerId) => {
-            setPeerId(peerId)
-            if (sessionId != null) {
-                peerManager.connectToPeer(sessionId, () => {
-                    peerManager
-                        .sendToPeer(sessionId, 'Hello, peer!')
-                        ?.catch((reason): void => {
-                            console.log(
-                                'sendToPeer failed with reason: ',
-                                reason,
-                            )
-                        })
-                })
+    const createPeer = async (sessionId?: string): Promise<() => void> => {
+        await peerManager.createPeer().then(async () => {
+            if (peerManager.peer != null) {
+                setPeerId(peerManager.peer?.id)
+                if (sessionId != null) {
+                    await peerManager.connectToPeer(sessionId).then(() => {
+                        peerManager
+                            .sendToPeer(sessionId, 'Hello, peer!')
+                            .catch((reason): void => {
+                                console.log(
+                                    'sendToPeer failed with reason: ',
+                                    reason,
+                                )
+                            })
+                    })
+                }
             }
         })
         return () => {
-            peerManager.destroyPeer()
+            peerManager.destroyPeer().catch(console.error)
         }
     }
 
     useEffect(() => {
-        if (sessionId != null) createPeer(sessionId)
+        const createPeerWithSessionId = async (
+            sessionId: string,
+        ): Promise<void> => {
+            await createPeer(sessionId)
+        }
+
+        if (sessionId != null) {
+            createPeerWithSessionId(sessionId).catch(console.error)
+        }
     }, [sessionId])
 
     const handleCollaborateClick = (): void => {
         window.alert('This feature is still under active development')
-        try {
-            createPeer()
-        } catch (error) {
-            console.error('Failed to create session:', error)
-        }
+        createPeer().catch(console.error)
     }
 
     const handleTemplateUpload = (
