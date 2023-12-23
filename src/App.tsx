@@ -28,10 +28,10 @@ function App(): ReactElement {
         const params = new URLSearchParams(document.location.search)
         const newSessionId = params.get('sessionId')
         if (newSessionId != null) {
-            console.log(`Found sessionId ${newSessionId} in path.`)
+            console.debug(`Found sessionId ${newSessionId} in path.`)
             setSessionId(newSessionId)
         } else {
-            console.log('No sessionId found in path')
+            console.debug('No sessionId found in path')
         }
     }
 
@@ -65,7 +65,7 @@ function App(): ReactElement {
     }, [collaborators])
 
     const setPeerCallbacks = (): void => {
-        console.log('Setting Peer Callbacks')
+        console.debug('Setting Peer Callbacks')
         peerManager.setDataReceivedCallback(
             [MadlibsMessageType.InputChange],
             handleInputMessage,
@@ -87,11 +87,6 @@ function App(): ReactElement {
     const handleRequestStateMessage = async (
         msg: MadlibsMessage,
     ): Promise<void> => {
-        console.log(
-            'Message Received: ',
-            msg.data.peerId,
-            MadlibsMessageType.RequestState,
-        )
         const requestingPeerId = msg.data.peerId as string
         peerManager.setDataReceivedCallback(
             [MadlibsMessageType.InitialState],
@@ -102,11 +97,6 @@ function App(): ReactElement {
     const handleInitialStateMessage = async (
         msg: MadlibsMessage,
     ): Promise<void> => {
-        console.log(
-            'Message Received: ',
-            msg.data.peerId,
-            MadlibsMessageType.RequestState,
-        )
         const initialTemplate = msg.data.template as string
         const initialInputs = msg.data.inputs as Record<string, string>
         setTemplate(initialTemplate)
@@ -118,6 +108,10 @@ function App(): ReactElement {
             if (peerManager.peer != null) {
                 setPeerId(peerManager.peer.id)
                 setPeerCallbacks()
+                // When the new peer is created it
+                // - checks if it should connect to a session
+                // - tries to connect to the session
+                // - requests the current session state once successfully connected
                 if (sessionId != null) {
                     await peerManager.connectToPeer(sessionId).then(() => {
                         peerManager
@@ -127,7 +121,7 @@ function App(): ReactElement {
                                 data: { peerId: peerManager.peer?.id },
                             })
                             .catch((reason): void => {
-                                console.log(
+                                console.debug(
                                     'sendMessage failed with reason: ',
                                     reason,
                                 )

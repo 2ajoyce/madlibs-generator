@@ -92,7 +92,7 @@ class PeerManager {
                 this.peer = new Peer(id, SERVER_CONNECTION)
                 this.setupPeerListeners(resolve, reject)
             } else {
-                console.log('Reusing existing Peer: ', this.peer.id)
+                console.debug('Reusing existing Peer: ', this.peer.id)
                 resolve()
             }
         })
@@ -108,26 +108,10 @@ class PeerManager {
 
             const conn = this.peer.connect(peerId)
             conn.on('open', () => {
-                console.log('Connection established with: ', peerId)
+                console.debug('Connection established with: ', peerId)
                 const pm = PeerManager.getInstance()
                 pm.connections.push(conn)
                 pm.setupConnectionListeners(conn)
-                // if (this.stateClosure != null) {
-                //     const state = this.stateClosure.getState()
-                //     console.log(state)
-                //     conn.send({
-                //         type: MadlibsMessageType.TemplateChange,
-                //         data: { template: state?.template },
-                //     })?.catch(console.error)
-                //     if (state?.fields != null && state.fields.keys.length > 0) {
-                //         for (const key of state.fields.keys) {
-                //             conn.send({
-                //                 type: MadlibsMessageType.InputChange,
-                //                 data: { name: key, value: state.fields[key] },
-                //             })?.catch(console.error)
-                //         }
-                //     }
-                // }
                 resolve()
             })
             conn.on('error', (err) => {
@@ -139,7 +123,7 @@ class PeerManager {
 
     // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
     public async sendMessageToAll(message: MadlibsMessage): Promise<void[]> {
-        console.log('Sending message', message)
+        console.debug('Sending message to all', message)
         const sendPromises = Object.values(this.connections).map(
             async (connection) => {
                 await new Promise<void>((resolve, reject) => {
@@ -159,10 +143,9 @@ class PeerManager {
         peerId: string,
         message: MadlibsMessage,
     ): Promise<void> {
-        console.log(`Sending message to ${peerId}: `, message)
+        console.debug(`Sending message to ${peerId}: `, message)
         await new Promise<void>((resolve, reject) => {
             const pm = PeerManager.getInstance()
-            console.log(pm.connections)
             const conn = pm.connections.find((e) => e.peer === peerId)
             if (conn !== undefined) {
                 resolve(conn.send(message))
@@ -194,7 +177,7 @@ class PeerManager {
         }
 
         this.peer.on('open', () => {
-            console.log('Created Peer: ', this.peer?.id)
+            console.debug('Created Peer: ', this.peer?.id)
             if (this.peer != null) {
                 resolve()
             } else {
@@ -203,7 +186,7 @@ class PeerManager {
         })
 
         this.peer.on('connection', (conn) => {
-            console.log(`Incoming connection from: ${conn.connectionId}`)
+            console.debug(`Incoming connection from: ${conn.connectionId}`)
             this.setupConnectionListeners(conn)
         })
 
@@ -215,20 +198,25 @@ class PeerManager {
 
     setupConnectionListeners(conn: DataConnection): void {
         conn.on('open', () => {
-            console.log('Connection established')
+            console.debug('Connection established')
             const pm = PeerManager.getInstance()
             pm.connections.push(conn)
         })
 
         conn.on('data', (data) => {
-            console.log('Received data:', data)
             if (isValidMadlibsMessage(data)) {
+                console.debug(
+                    'Message Received: ',
+                    data.peerId,
+                    data.type,
+                    data.data,
+                )
                 const pm = PeerManager.getInstance()
                 for (const cb of pm.dataReceivedCallbacks[data.type]) {
                     void cb(data)
                 }
             } else {
-                console.error('Invalid message: ', data)
+                console.error('Invalid message received: ', data)
             }
         })
 
