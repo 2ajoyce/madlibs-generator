@@ -1,7 +1,10 @@
 import { useEffect, useState, type ChangeEvent, type ReactElement } from 'react'
 import './App.css'
 import InputFields from './InputFields'
-import PeerManager from './PeerManager'
+import PeerManager, {
+    MadlibsMessageType,
+    type MadlibsMessage,
+} from './PeerManager'
 import SessionDisplay from './SessionDisplay'
 import TemplateInput from './TemplateInput'
 import {
@@ -9,16 +12,15 @@ import {
     processTemplateFile,
 } from './file_processing/txt_files'
 
-type Inputs = Record<string, string>
-
 function App(): ReactElement {
     const [template, setTemplate] = useState('')
     const [templateFields, setTemplateFields] = useState<string[]>([])
-    const [inputs, setInputs] = useState<Inputs>({})
+    const [inputs, setInputs] = useState<Record<string, string>>({})
     const [story, setStory] = useState('')
-    // sessionId is intended to store the parent session. Current session can be retrieved from peer.id
+    // sessionId is intended to store the parent session. Current peer can be retrieved from peer.id
     const [sessionId, setSessionId] = useState<string | null>(null)
     const [peerId, setPeerId] = useState<string | null>(null)
+    const [collaborators, setCollaborators] = useState<string[]>([])
 
     const peerManager: PeerManager = PeerManager.getInstance()
 
@@ -37,17 +39,96 @@ function App(): ReactElement {
         getSessionIdFromPath()
     }, [])
 
+    useEffect(() => {
+        const fields = extractTemplateFields(template)
+        setTemplateFields(fields)
+    }, [template])
+
+    useEffect(() => {
+        const sendInitialState = async (): Promise<void> => {
+            const mostRecentPeerId = collaborators.at(-1)
+            if (mostRecentPeerId !== undefined) {
+                await peerManager.sendMessage(mostRecentPeerId, {
+                    type: MadlibsMessageType.InitialState,
+                    peerId: peerId ?? '',
+                    data: {
+                        template,
+                        inputs,
+                    },
+                })
+            }
+        }
+
+        if (collaborators.length > 0) {
+            sendInitialState().catch(console.error)
+        }
+    }, [collaborators])
+
+    const setPeerCallbacks = (): void => {
+        console.log('Setting Peer Callbacks')
+        peerManager.setDataReceivedCallback(
+            [MadlibsMessageType.InputChange],
+            handleInputMessage,
+        )
+        peerManager.setDataReceivedCallback(
+            [MadlibsMessageType.TemplateChange],
+            handleTemplateMessage,
+        )
+        peerManager.setDataReceivedCallback(
+            [MadlibsMessageType.RequestState],
+            handleRequestStateMessage,
+        )
+        peerManager.setDataReceivedCallback(
+            [MadlibsMessageType.InitialState],
+            handleInitialStateMessage,
+        )
+    }
+
+    const handleRequestStateMessage = async (
+        msg: MadlibsMessage,
+    ): Promise<void> => {
+        console.log(
+            'Message Received: ',
+            msg.data.peerId,
+            MadlibsMessageType.RequestState,
+        )
+        const requestingPeerId = msg.data.peerId as string
+        peerManager.setDataReceivedCallback(
+            [MadlibsMessageType.InitialState],
+            handleInitialStateMessage,
+        )
+        setCollaborators([...collaborators, requestingPeerId])
+    }
+    const handleInitialStateMessage = async (
+        msg: MadlibsMessage,
+    ): Promise<void> => {
+        console.log(
+            'Message Received: ',
+            msg.data.peerId,
+            MadlibsMessageType.RequestState,
+        )
+        const initialTemplate = msg.data.template as string
+        const initialInputs = msg.data.inputs as Record<string, string>
+        setTemplate(initialTemplate)
+        setInputs(initialInputs)
+    }
+
     const createPeer = async (sessionId?: string): Promise<() => void> => {
         await peerManager.createPeer().then(async () => {
             if (peerManager.peer != null) {
-                setPeerId(peerManager.peer?.id)
+                setPeerId(peerManager.peer.id)
+                setPeerCallbacks()
                 if (sessionId != null) {
                     await peerManager.connectToPeer(sessionId).then(() => {
                         peerManager
-                            .sendToPeer(sessionId, 'Hello, peer!')
+                            .sendMessage(sessionId, {
+                                peerId: peerId ?? '',
+                                type: MadlibsMessageType.RequestState,
+                                data: { peerId: peerManager.peer?.id },
+                            })
                             .catch((reason): void => {
                                 console.log(
-                                    'sendToPeer failed with reason: ',
+                                    'sendMessage failed with reason: ',
                                     reason,
                                 )
                             })
@@ -73,7 +154,7 @@ function App(): ReactElement {
     }, [sessionId])
 
     const handleCollaborateClick = (): void => {
-        window.alert('This feature is still under active development')
+        // window.alert('This feature is still under active development')
         createPeer().catch(console.error)
     }
 
@@ -83,9 +164,8 @@ function App(): ReactElement {
         if (event.target.files?.length === 1) {
             processTemplateFile(event.target.files[0])
                 .then(({ template, fields }) => {
-                    setTemplate(template) // Update template in state
-                    setTemplateFields(fields) // Update template fields in state
-                    // Reset inputs or perform any additional state updates
+                    setTemplate(template)
+                    sendTemplateMessage(template)
                 })
                 .catch((error) => {
                     console.error('Error processing file:', error)
@@ -98,8 +178,7 @@ function App(): ReactElement {
     ): void => {
         const newTemplate = event.target.value
         setTemplate(newTemplate)
-        const fields = extractTemplateFields(newTemplate)
-        setTemplateFields(fields)
+        sendTemplateMessage(newTemplate)
     }
 
     // Function to convert placeholder id to a more readable format
@@ -112,6 +191,51 @@ function App(): ReactElement {
 
     const handleInputChange = (name: string, value: string): void => {
         setInputs({ ...inputs, [name]: value })
+        sendInputMessage(name, value)
+    }
+    const sendInputMessage = (name: string, value: string): void => {
+        peerManager
+            .sendMessageToAll({
+                peerId: peerId ?? '',
+                type: MadlibsMessageType.InputChange,
+                data: { name, value },
+            })
+            .then(() => {
+                console.debug('Message sent to all peers')
+            })
+            .catch((error) => {
+                console.error('Error sending message to all peers:', error)
+            })
+    }
+
+    const handleInputMessage = (msg: MadlibsMessage): void => {
+        setInputs({ ...inputs, [msg.data.name]: msg.data.value })
+        if (sessionId == null) {
+            sendInputMessage(msg.data.name as string, msg.data.value as string)
+        }
+    }
+
+    const sendTemplateMessage = (newTemplate: string): void => {
+        peerManager
+            .sendMessageToAll({
+                peerId: peerId ?? '',
+                type: MadlibsMessageType.TemplateChange,
+                data: { template: newTemplate },
+            })
+            .then(() => {
+                console.debug('Message sent to all peers')
+            })
+            .catch((error) => {
+                console.error('Error sending message to all peers:', error)
+            })
+    }
+
+    const handleTemplateMessage = (msg: MadlibsMessage): void => {
+        const newTemplate = msg.data.template as string
+        setTemplate(newTemplate)
+        if (sessionId == null) {
+            sendTemplateMessage(newTemplate)
+        }
     }
 
     const generateStory = (): void => {

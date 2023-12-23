@@ -11,12 +11,62 @@ const SERVER_CONNECTION = {
     debug: 2, // 2 for normal operation, 3 for debug
     key: SERVER_KEY,
 }
+
+export enum MadlibsMessageType {
+    InputChange = 'INPUT_CHANGE',
+    TemplateChange = 'TEMPLATE_CHANGE',
+    RequestState = 'REQUEST_STATE',
+    InitialState = 'INITIAL_STATE',
+}
+
+export interface MadlibsMessage {
+    type: MadlibsMessageType
+    peerId: string
+    data: Record<string, any>
+}
+
+function isValidMadlibsMessage(message: any): message is MadlibsMessage {
+    if (typeof message !== 'object' || message === null) {
+        return false
+    }
+
+    if (!('type' in message) || !('data' in message)) {
+        return false
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    if (!Object.values(MadlibsMessageType).includes(message.type)) {
+        return false
+    }
+
+    if (message.data === null) {
+        return false
+    }
+
+    return true
+}
+
+// This type exists because Prettier and eslint could not
+// agree on formatting when inlined
+type DataReceivedCallbacks = Record<
+    MadlibsMessageType,
+    Array<(data: any) => void | Promise<void>>
+>
+
 class PeerManager {
     private static instance: PeerManager
     public peer: Peer | null = null
-    private connections: Record<string, DataConnection> = {}
+    private connections: DataConnection[] = []
+    private readonly dataReceivedCallbacks: DataReceivedCallbacks
 
-    private constructor() {}
+    private constructor() {
+        this.dataReceivedCallbacks = {
+            INPUT_CHANGE: [],
+            TEMPLATE_CHANGE: [],
+            REQUEST_STATE: [],
+            INITIAL_STATE: [],
+        }
+    }
 
     public static getInstance(): PeerManager {
         // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
@@ -26,12 +76,21 @@ class PeerManager {
         return PeerManager.instance
     }
 
+    public setDataReceivedCallback(
+        types: MadlibsMessageType[],
+        callback: (data: any) => void | Promise<void>,
+    ): void {
+        types.forEach((type) => {
+            this.dataReceivedCallbacks[type].push(callback)
+        })
+    }
+
     public async createPeer(): Promise<void> {
         await new Promise<void>((resolve, reject) => {
             if (this.peer == null) {
                 const id = uuidv4()
                 this.peer = new Peer(id, SERVER_CONNECTION)
-                this.setupConnectionListeners(resolve, reject)
+                this.setupPeerListeners(resolve, reject)
             } else {
                 console.log('Reusing existing Peer: ', this.peer.id)
                 resolve()
@@ -50,46 +109,82 @@ class PeerManager {
             const conn = this.peer.connect(peerId)
             conn.on('open', () => {
                 console.log('Connection established with: ', peerId)
-                this.connections[peerId] = conn
+                const pm = PeerManager.getInstance()
+                pm.connections.push(conn)
+                pm.setupConnectionListeners(conn)
+                // if (this.stateClosure != null) {
+                //     const state = this.stateClosure.getState()
+                //     console.log(state)
+                //     conn.send({
+                //         type: MadlibsMessageType.TemplateChange,
+                //         data: { template: state?.template },
+                //     })?.catch(console.error)
+                //     if (state?.fields != null && state.fields.keys.length > 0) {
+                //         for (const key of state.fields.keys) {
+                //             conn.send({
+                //                 type: MadlibsMessageType.InputChange,
+                //                 data: { name: key, value: state.fields[key] },
+                //             })?.catch(console.error)
+                //         }
+                //     }
+                // }
                 resolve()
             })
             conn.on('error', (err) => {
                 console.error('Connection error:', err)
                 reject(err)
             })
-            conn.on('close', () => {
-                console.log('Connection closed')
-            })
-            conn.on('iceStateChanged', () => {
-                console.log('Ice State Changed')
-            })
         })
     }
 
-    public async sendToPeer(peerId: string, message: any): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+    public async sendMessageToAll(message: MadlibsMessage): Promise<void[]> {
+        console.log('Sending message', message)
+        const sendPromises = Object.values(this.connections).map(
+            async (connection) => {
+                await new Promise<void>((resolve, reject) => {
+                    try {
+                        resolve(connection.send(message))
+                    } catch (error) {
+                        reject(error)
+                    }
+                })
+            },
+        )
+
+        return await Promise.all(sendPromises)
+    }
+
+    public async sendMessage(
+        peerId: string,
+        message: MadlibsMessage,
+    ): Promise<void> {
+        console.log(`Sending message to ${peerId}: `, message)
         await new Promise<void>((resolve, reject) => {
-            const connection = this.connections[peerId]
-            if (connection != null) {
-                resolve(connection.send(message))
+            const pm = PeerManager.getInstance()
+            console.log(pm.connections)
+            const conn = pm.connections.find((e) => e.peer === peerId)
+            if (conn !== undefined) {
+                resolve(conn.send(message))
             } else {
-                console.error('No connection found for the given peerId')
-                reject(new Error('No connection found for the given peerId'))
+                reject(new Error(`No connection to ${peerId} found`))
             }
         })
     }
 
     public async destroyPeer(): Promise<void> {
+        const pm = PeerManager.getInstance()
         await new Promise<void>((resolve) => {
-            if (this.peer != null) {
-                this.peer.destroy()
-                this.peer = null
+            if (pm.peer != null) {
+                pm.peer.destroy()
+                pm.peer = null
             }
-            this.connections = {}
+            pm.connections = []
             resolve()
         })
     }
 
-    setupConnectionListeners(
+    setupPeerListeners(
         resolve: (value: void | PromiseLike<void>) => void,
         reject: (reason?: any) => void,
     ): void {
@@ -109,23 +204,36 @@ class PeerManager {
 
         this.peer.on('connection', (conn) => {
             console.log(`Incoming connection from: ${conn.connectionId}`)
-
-            conn.on('open', () => {
-                console.log('Connection established')
-            })
-
-            conn.on('data', (data) => {
-                console.log('Received data:', data)
-            })
-
-            conn.on('error', (err) => {
-                console.error('Connection error:', err)
-            })
+            this.setupConnectionListeners(conn)
         })
 
         this.peer.on('error', (err) => {
             console.error('Peer error:', err)
             reject(err)
+        })
+    }
+
+    setupConnectionListeners(conn: DataConnection): void {
+        conn.on('open', () => {
+            console.log('Connection established')
+            const pm = PeerManager.getInstance()
+            pm.connections.push(conn)
+        })
+
+        conn.on('data', (data) => {
+            console.log('Received data:', data)
+            if (isValidMadlibsMessage(data)) {
+                const pm = PeerManager.getInstance()
+                for (const cb of pm.dataReceivedCallbacks[data.type]) {
+                    void cb(data)
+                }
+            } else {
+                console.error('Invalid message: ', data)
+            }
+        })
+
+        conn.on('error', (err) => {
+            console.error('Connection error:', err)
         })
     }
 }

@@ -1,12 +1,3 @@
-const getFields = (result: string): RegExpMatchArray | [] => {
-    const fields = result.match(/{(.*?)}/g)
-    if (fields != null) {
-        return fields
-    } else {
-        return []
-    }
-}
-
 export const processTemplateFile = async (
     file: File,
 ): Promise<{ template: string; fields: string[] }> => {
@@ -15,11 +6,8 @@ export const processTemplateFile = async (
         fileReader.onload = (e) => {
             const result = e.target?.result
             if (typeof result === 'string') {
-                const fields = getFields(result)
-                const uniqueFields = Array.from(
-                    new Set(fields.map((field) => field.replace(/[{}]/g, ''))),
-                )
-                resolve({ template: result, fields: uniqueFields })
+                const fields = extractTemplateFields(result)
+                resolve({ template: result, fields })
             } else {
                 reject(new Error('File content is not a string.'))
             }
