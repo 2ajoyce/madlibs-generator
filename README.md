@@ -31,4 +31,4 @@ This project demonstrates practical use of [PeerJS](https://peerjs.com/) for rea
 
 I encourage you to [try the demo](https://madlibs.2ajoyce.com). Feedback and contributions are welcome! If you have ideas or encounter issues, please feel free to reach out.
 
-For more of my work and updates, connect with me on [LinkedIn](www.linkedin.com/in/2ajoyce).
+For more of my work and updates, connect with me on [LinkedIn](https://www.linkedin.com/in/2ajoyce).
