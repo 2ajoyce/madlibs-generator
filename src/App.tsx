@@ -42,7 +42,9 @@ function App(): ReactElement {
         const fields = extractTemplateFields(template)
         const newInputs: Record<string, string> = {}
         for (const field of fields) {
-            newInputs[field] = Object.keys(inputs).includes(field) ? inputs[field] : ''
+            newInputs[field] = Object.keys(inputs).includes(field)
+                ? inputs[field]
+                : ''
         }
         setInputs(newInputs)
     }, [template])
@@ -95,7 +97,10 @@ function App(): ReactElement {
             [MadlibsMessageType.InitialState],
             handleInitialStateMessage,
         )
-        setCollaborators([...collaborators, requestingPeerId])
+        setCollaborators((collaborators) => [
+            ...collaborators,
+            requestingPeerId,
+        ])
     }
     const handleInitialStateMessage = async (
         msg: MadlibsMessage,
@@ -187,7 +192,7 @@ function App(): ReactElement {
     }
 
     const handleInputChange = (name: string, value: string): void => {
-        setInputs({ ...inputs, [name]: value })
+        setInputs((inputs) => ({ ...inputs, [name]: value }))
         sendInputMessage(name, value)
     }
     const sendInputMessage = (name: string, value: string): void => {
@@ -206,7 +211,8 @@ function App(): ReactElement {
     }
 
     const handleInputMessage = (msg: MadlibsMessage): void => {
-        setInputs({ ...inputs, [msg.data.name]: msg.data.value })
+        console.log(inputs, msg)
+        setInputs((inputs) => ({ ...inputs, [msg.data.name]: msg.data.value }))
         if (sessionId == null) {
             sendInputMessage(msg.data.name as string, msg.data.value as string)
         }
