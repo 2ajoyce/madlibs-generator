@@ -7,7 +7,7 @@ name: Prod
         branches:
             - main
 jobs:
-    build_and_deploy:
+    deploy:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
