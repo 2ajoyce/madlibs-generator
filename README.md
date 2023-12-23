@@ -2,7 +2,7 @@
 
 [![Prod](https://github.com/2ajoyce/madlibs-generator/actions/workflows/firebase-hosting-merge.yml/badge.svg)](https://madlibs.2ajoyce.com)
 
-Generate and populating madlibs stories on your own, or with friends!
+Generate and fill out madlibs stories on your own, or with friends!
 
 Use the Collaborate button to start a session, then send the link to friends who you want to collaborate with.
 
