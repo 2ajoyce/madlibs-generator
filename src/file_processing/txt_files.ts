@@ -1,13 +1,12 @@
 export const processTemplateFile = async (
     file: File,
-): Promise<{ template: string; fields: string[] }> => {
+): Promise<{ template: string }> => {
     return await new Promise((resolve, reject) => {
         const fileReader = new FileReader()
         fileReader.onload = (e) => {
             const result = e.target?.result
             if (typeof result === 'string') {
-                const fields = extractTemplateFields(result)
-                resolve({ template: result, fields })
+                resolve({ template: result })
             } else {
                 reject(new Error('File content is not a string.'))
             }

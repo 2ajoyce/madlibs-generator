@@ -157,7 +157,7 @@ function App(): ReactElement {
     ): void => {
         if (event.target.files?.length === 1) {
             processTemplateFile(event.target.files[0])
-                .then(({ template, fields }) => {
+                .then(({ template }) => {
                     setTemplate(template)
                     sendTemplateMessage(template)
                 })
