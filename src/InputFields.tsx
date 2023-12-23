@@ -1,7 +1,6 @@
 import React from 'react'
 
 interface InputFieldsProps {
-    templateFields: string[]
     inputs: Record<string, string>
     handleInputChange: (name: string, value: string) => void
     sanitizeField: (field: string) => string
@@ -9,7 +8,6 @@ interface InputFieldsProps {
 }
 
 const InputFields: React.FC<InputFieldsProps> = ({
-    templateFields,
     inputs,
     handleInputChange,
     sanitizeField,
@@ -24,7 +22,7 @@ const InputFields: React.FC<InputFieldsProps> = ({
     }
     return (
         <>
-            {templateFields.map((field, index) => (
+            {Object.keys(inputs).map((field, index) => (
                 <input
                     key={index}
                     type="text"

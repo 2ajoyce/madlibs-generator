@@ -14,7 +14,6 @@ import {
 
 function App(): ReactElement {
     const [template, setTemplate] = useState('')
-    const [templateFields, setTemplateFields] = useState<string[]>([])
     const [inputs, setInputs] = useState<Record<string, string>>({})
     const [story, setStory] = useState('')
     // sessionId is intended to store the parent session. Current peer can be retrieved from peer.id
@@ -41,7 +40,11 @@ function App(): ReactElement {
 
     useEffect(() => {
         const fields = extractTemplateFields(template)
-        setTemplateFields(fields)
+        const newInputs: Record<string, string> = {}
+        for (const field of fields) {
+            newInputs[field] = Object.keys(inputs).includes(field) ? inputs[field] : ''
+        }
+        setInputs(newInputs)
     }, [template])
 
     useEffect(() => {
@@ -249,8 +252,7 @@ function App(): ReactElement {
 
     // Check conditions for enabling the "Generate Story" button
     const canGenerateStory =
-        templateFields.length > 0 &&
-        Object.keys(inputs).length === templateFields.length &&
+        Object.keys(inputs).length > 0 &&
         Object.values(inputs).every((value) => value.trim() !== '')
 
     return (
@@ -273,7 +275,6 @@ function App(): ReactElement {
             </div>
             <div className="card">
                 <InputFields
-                    templateFields={templateFields}
                     inputs={inputs}
                     handleInputChange={handleInputChange}
                     sanitizeField={sanitizeField}
