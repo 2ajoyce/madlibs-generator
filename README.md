@@ -1,6 +1,6 @@
 # madlibs-generator
 
-[![Prod](https://github.com/2ajoyce/madlibs-generator/actions/workflows/firebase-hosting-merge.yml/badge.svg)]
+[Prod](https://github.com/2ajoyce/madlibs-generator/actions/workflows/firebase-hosting-merge.yml/badge.svg)
 
 A simple site for generating and populating madlibs stories
 
