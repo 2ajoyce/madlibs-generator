@@ -6,6 +6,4 @@ A simple site for generating and populating madlibs stories
 
 ## Collaboration
 
-Coming Soon!
-
-![Demo of collaboration feature](/demos/2023-12-19.gif)
+![Demo of collaboration feature](/demos/2023-12-22.gif)
