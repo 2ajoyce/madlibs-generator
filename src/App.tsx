@@ -211,7 +211,6 @@ function App(): ReactElement {
     }
 
     const handleInputMessage = (msg: MadlibsMessage): void => {
-        console.log(inputs, msg)
         setInputs((inputs) => ({ ...inputs, [msg.data.name]: msg.data.value }))
         if (sessionId == null) {
             sendInputMessage(msg.data.name as string, msg.data.value as string)
