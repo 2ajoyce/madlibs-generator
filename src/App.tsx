@@ -257,6 +257,9 @@ function App(): ReactElement {
     }
 
     // Check conditions for enabling the "Generate Story" button
+    const canViewTemplate = sessionId === null
+
+    // Check conditions for enabling the "Generate Story" button
     const canGenerateStory =
         Object.keys(inputs).length > 0 &&
         Object.values(inputs).every((value) => value.trim() !== '')
@@ -269,16 +272,18 @@ function App(): ReactElement {
                 peerId={peerId}
                 handleCollaborateClick={handleCollaborateClick}
             />
-            <div className="upload-container">
-                <TemplateInput
-                    onFileUpload={handleTemplateUpload}
-                    onManualInput={handleManualTemplateInput}
-                    inputData={template}
-                    fileInputLabel="Upload Story Template"
-                    textAreaPlaceholder="Type your {awesome} template here! Use curly braces to indicate placeholders."
-                    infoText="Use curly braces {} to indicate placeholders in the template. For example, {noun}, {verb}, {adjective}."
-                />
-            </div>
+            {canViewTemplate && (
+                <div className="upload-container">
+                    <TemplateInput
+                        onFileUpload={handleTemplateUpload}
+                        onManualInput={handleManualTemplateInput}
+                        inputData={template}
+                        fileInputLabel="Upload Story Template"
+                        textAreaPlaceholder="Type your {awesome} template here! Use curly braces to indicate placeholders."
+                        infoText="Use curly braces {} to indicate placeholders in the template. For example, {noun}, {verb}, {adjective}."
+                    />
+                </div>
+            )}
             <div className="card">
                 <InputFields
                     inputs={inputs}
