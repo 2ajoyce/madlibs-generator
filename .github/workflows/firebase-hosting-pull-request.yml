@@ -6,6 +6,8 @@ name: Dev
 jobs:
     preview:
         if: '${{ github.event.pull_request.head.repo.full_name == github.repository }}'
+        environment:
+          name: Dev
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
