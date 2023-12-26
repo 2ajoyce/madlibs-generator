@@ -33,6 +33,6 @@ The Madlibs Generator leverages a targeted selection of technologies:
 
 ## Try It Out
 
-I encourage you to [try the demo](https://madlibs.2ajoyce.com). Feedback and contributions are welcome! If you have ideas or encounter issues, please feel free to reach out.
+I encourage you to [try the demo](https://madlibs.2ajoyce.com). If you have ideas or encounter issues, please feel free to reach out.
 
 For more of my work and updates, connect with me on [LinkedIn](https://www.linkedin.com/in/2ajoyce).
