@@ -26,7 +26,7 @@ The Madlibs Generator leverages a targeted selection of technologies:
 
 - **React**: Provides a responsive user interface.
 - **PeerJS**: Enables real-time, peer-to-peer collaborative editing.
-- **Cypress**: Automates component testing for enhanced application reliability.
+- **Cypress**: Automates e2e and component testing for enhanced application reliability.
 - **Firebase**: Delivers scalable hosting and performance stability.
 - **GitHub Actions**: Manages CI/CD, streamlining updates and deployment efficiency.
 
