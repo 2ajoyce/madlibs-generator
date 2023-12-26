@@ -22,10 +22,14 @@ This project demonstrates practical use of [PeerJS](https://peerjs.com/) for rea
 
 ## Technology Stack
 
--   **Front-End**: Built with React for a dynamic user interface.
--   **Networking**: PeerJS for handling peer-to-peer connections.
--   **Deployment**: Hosted on Firebase for a reliable cloud-based solution.
--   **Continuous Deployment**: Automated with GitHub Actions to streamline updates and deployments.
+The Madlibs Generator leverages a targeted selection of technologies:
+
+- **React**: Provides a responsive user interface.
+- **PeerJS**: Enables real-time, peer-to-peer collaborative editing.
+- **Cypress**: Automates component testing for enhanced application reliability.
+- **Firebase**: Delivers scalable hosting and performance stability.
+- **GitHub Actions**: Manages CI/CD, streamlining updates and deployment efficiency.
+
 
 ## Try It Out
 
