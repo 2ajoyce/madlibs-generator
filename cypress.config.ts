@@ -7,7 +7,6 @@ export default defineConfig({
             console.debug('Impliment node event listeners here', on, config)
         },
         excludeSpecPattern: [
-            '*/*/**/spec.cy.ts',
             '*/**/1-getting-started',
             '*/**/2-advanced-examples',
         ],
