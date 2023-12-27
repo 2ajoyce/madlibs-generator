@@ -267,8 +267,7 @@ function App(): ReactElement {
         <>
             <h1>Madlibs Generator</h1>
             <SessionDisplay
-                sessionId={sessionId}
-                peerId={peerId}
+                sessionId={sessionId ?? peerId}
                 handleCollaborateClick={handleCollaborateClick}
             />
             {canViewTemplate && (
