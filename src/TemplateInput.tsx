@@ -5,18 +5,15 @@ interface TemplateInputProps {
     onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void
     onManualInput: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
     inputData: string
-    infoText?: string
-    fileInputLabel: string
-    textAreaPlaceholder: string
 }
+
+const TEXT_AREA_PLACEHOLDER =
+    'Type your {awesome} template here! Use curly braces to indicate placeholders.'
 
 const TemplateInput: React.FC<TemplateInputProps> = ({
     onFileUpload,
     onManualInput,
     inputData,
-    infoText,
-    fileInputLabel,
-    textAreaPlaceholder,
 }) => {
     const [useFileUpload, setUseFileUpload] = useState(false)
 
@@ -26,16 +23,14 @@ const TemplateInput: React.FC<TemplateInputProps> = ({
 
     const fileUploadComponent = (
         <FileUpload
-            label={fileInputLabel}
             onChange={onFileUpload}
-            infoText={infoText}
         />
     )
     const textInputComponent = (
         <textarea
             value={inputData}
             onChange={onManualInput}
-            placeholder={textAreaPlaceholder}
+            placeholder={TEXT_AREA_PLACEHOLDER}
         />
     )
 
