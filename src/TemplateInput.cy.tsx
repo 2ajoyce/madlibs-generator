@@ -3,60 +3,29 @@ import TemplateInput from './TemplateInput'
 interface TestCase {
     description: string
     inputData: string
-    infoText?: string
-    fileInputLabel: string
-    textAreaPlaceholder: string
     expectFileUpload: boolean
 }
 describe('<TemplateInput />', () => {
     const testCases: TestCase[] = [
         {
-            description: 'File upload mode, no input, info text present',
-            inputData: '',
-            infoText: 'Sample info text',
-            fileInputLabel: 'Upload File',
-            textAreaPlaceholder: 'Enter text manually',
+            description: 'File upload mode, no input',
             expectFileUpload: true,
+            inputData: '',
         },
         {
-            description: 'File upload mode, no input, no info text',
+            description: 'Text input mode, no input',
+            expectFileUpload: false,
             inputData: '',
-            infoText: undefined,
-            fileInputLabel: 'Upload File',
-            textAreaPlaceholder: 'Enter text manually',
+        },
+        {
+            description: 'File upload mode, with input',
             expectFileUpload: true,
-        },
-        {
-            description: 'Text input mode, no input, info text present',
-            inputData: '',
-            infoText: 'Sample info text',
-            fileInputLabel: 'Upload File',
-            textAreaPlaceholder: 'Enter text manually',
-            expectFileUpload: false,
-        },
-        {
-            description: 'Text input mode, no input, no info text',
-            inputData: '',
-            infoText: undefined,
-            fileInputLabel: 'Upload File',
-            textAreaPlaceholder: 'Enter text manually',
-            expectFileUpload: false,
-        },
-        {
-            description: 'File upload mode, with input, info text present',
             inputData: 'Sample text',
-            infoText: 'Sample info text',
-            fileInputLabel: 'Upload File',
-            textAreaPlaceholder: 'Enter text manually',
-            expectFileUpload: true,
         },
         {
-            description: 'Text input mode, with input, info text present',
-            inputData: 'Sample text',
-            infoText: 'Sample info text',
-            fileInputLabel: 'Upload File',
-            textAreaPlaceholder: 'Enter text manually',
+            description: 'Text input mode, with input',
             expectFileUpload: false,
+            inputData: 'Sample text',
         },
     ]
 
@@ -67,9 +36,6 @@ describe('<TemplateInput />', () => {
                     onFileUpload={cy.stub()}
                     onManualInput={cy.stub()}
                     inputData={testCase.inputData}
-                    infoText={testCase.infoText}
-                    fileInputLabel={testCase.fileInputLabel}
-                    textAreaPlaceholder={testCase.textAreaPlaceholder}
                 />,
             ).then(() => {
                 if (testCase.expectFileUpload) {
@@ -84,23 +50,6 @@ describe('<TemplateInput />', () => {
                             )
                             // Verify that the FileUpload component is present after the click
                             cy.get('.upload-box').should('exist')
-                            // Verify the file input label
-                            cy.get('.upload-box>label').should(
-                                'have.text',
-                                `${testCase.fileInputLabel}:`,
-                            )
-
-                            if (testCase.infoText !== undefined) {
-                                // Verify that the info text is displayed
-                                cy.get('.info-icon').should(
-                                    'have.attr',
-                                    'title',
-                                    testCase.infoText,
-                                )
-                            } else {
-                                // Verify that the info text element is absent
-                                cy.get('.info-icon').should('not.exist')
-                            }
                         })
                 } else {
                     // Verify the button text
@@ -108,13 +57,14 @@ describe('<TemplateInput />', () => {
                         'have.text',
                         'Upload File',
                     )
-                    // Verify that the text area is present with the correct placeholder
+                    // Verify that the text area is present
                     cy.get('textarea')
-                        .should(
-                            'have.attr',
-                            'placeholder',
-                            testCase.textAreaPlaceholder,
-                        )
+                        .should('exist')
+                        .should('have.attr', 'placeholder')
+
+                    // Verify that the text area has expected value
+                    cy.get('textarea')
+                        .should('exist')
                         .and('have.value', testCase.inputData)
                 }
             })
@@ -126,9 +76,6 @@ describe('<TemplateInput />', () => {
                 onFileUpload={cy.stub()}
                 onManualInput={cy.stub()}
                 inputData=""
-                infoText="Some info text"
-                fileInputLabel="Upload a file"
-                textAreaPlaceholder="Enter text here"
             />,
         ).then(() => {
             // Initially, the TextArea should be visible
@@ -159,9 +106,6 @@ describe('<TemplateInput />', () => {
                 onFileUpload={fileUploadStub}
                 onManualInput={cy.stub()}
                 inputData=""
-                infoText="Some info text"
-                fileInputLabel="Upload a file"
-                textAreaPlaceholder="Enter text here"
             />,
         ).then(() => {
             // Initially switch to FileUpload component
@@ -204,9 +148,6 @@ describe('<TemplateInput />', () => {
                 onFileUpload={cy.stub()}
                 onManualInput={manualInputStub}
                 inputData=""
-                infoText="Some info text"
-                fileInputLabel="Upload a file"
-                textAreaPlaceholder="Enter text here"
             />,
         ).then(() => {
             // Type some text into the textarea

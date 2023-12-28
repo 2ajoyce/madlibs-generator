@@ -263,9 +263,6 @@ function App(): ReactElement {
                         onFileUpload={handleTemplateUpload}
                         onManualInput={handleManualTemplateInput}
                         inputData={template}
-                        fileInputLabel="Upload Story Template"
-                        textAreaPlaceholder="Type your {awesome} template here! Use curly braces to indicate placeholders."
-                        infoText="Use curly braces {} to indicate placeholders in the template. For example, {noun}, {verb}, {adjective}."
                     />
                 </div>
             )}
