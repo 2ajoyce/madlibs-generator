@@ -4,14 +4,20 @@ interface InputFieldsProps {
     inputs: Record<string, string>
     handleInputChange: (name: string, value: string) => void
     sanitizeField: (field: string) => string
-    formatPlaceholder: (id: string) => string
+}
+
+// Function to convert placeholder id to a more readable format
+const formatPlaceholder = (id: string): string => {
+    return id
+        .split('-')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')
 }
 
 const InputFields: React.FC<InputFieldsProps> = ({
     inputs,
     handleInputChange,
     sanitizeField,
-    formatPlaceholder,
 }) => {
     return (
         <>
