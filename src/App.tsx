@@ -183,14 +183,6 @@ function App(): ReactElement {
         sendTemplateMessage(newTemplate)
     }
 
-    // Function to convert placeholder id to a more readable format
-    const formatPlaceholder = (id: string): string => {
-        return id
-            .split('-')
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ')
-    }
-
     const handleInputChange = (name: string, value: string): void => {
         setInputs((inputs) => ({ ...inputs, [name]: value }))
         sendInputMessage(name, value)
@@ -287,7 +279,6 @@ function App(): ReactElement {
                     inputs={inputs}
                     handleInputChange={handleInputChange}
                     sanitizeField={sanitizeField}
-                    formatPlaceholder={formatPlaceholder}
                 />
             </div>
             <div className="button-container">
