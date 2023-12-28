@@ -3,7 +3,6 @@ import React from 'react'
 interface InputFieldsProps {
     inputs: Record<string, string>
     handleInputChange: (name: string, value: string) => void
-    sanitizeField: (field: string) => string
 }
 
 // Function to convert placeholder id to a more readable format
@@ -14,10 +13,13 @@ const formatPlaceholder = (id: string): string => {
         .join(' ')
 }
 
+const sanitizeField = (field: string): string => {
+    return field.replace(/[^a-zA-Z0-9-_]/g, '')
+}
+
 const InputFields: React.FC<InputFieldsProps> = ({
     inputs,
     handleInputChange,
-    sanitizeField,
 }) => {
     return (
         <>

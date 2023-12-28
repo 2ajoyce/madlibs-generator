@@ -243,10 +243,6 @@ function App(): ReactElement {
         setStory(storyTemplate)
     }
 
-    const sanitizeField = (field: string): string => {
-        return field.replace(/[^a-zA-Z0-9-_]/g, '')
-    }
-
     // Check conditions for enabling the "Generate Story" button
     const canViewTemplate = sessionId === null
 
@@ -278,7 +274,6 @@ function App(): ReactElement {
                 <InputFields
                     inputs={inputs}
                     handleInputChange={handleInputChange}
-                    sanitizeField={sanitizeField}
                 />
             </div>
             <div className="button-container">
