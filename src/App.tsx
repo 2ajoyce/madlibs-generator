@@ -156,7 +156,6 @@ function App(): ReactElement {
     }, [sessionId])
 
     const handleCollaborateClick = (): void => {
-        // window.alert('This feature is still under active development')
         createPeer().catch(console.error)
     }
 
