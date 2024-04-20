@@ -14,5 +14,6 @@ jobs:
               uses: cypress-io/github-action@v6
               with:
                   component: true
+                  install-command: npm ci --legacy-peer-deps # Remove this flag once eslint flat config is no longer breaking peer dependencies
                   build: npm run build
                   start: npm run dev
