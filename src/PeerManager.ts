@@ -34,7 +34,6 @@ function isValidMadlibsMessage(message: any): message is MadlibsMessage {
         return false
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     if (!Object.values(MadlibsMessageType).includes(message.type)) {
         return false
     }
@@ -69,7 +68,6 @@ class PeerManager {
     }
 
     public static getInstance(): PeerManager {
-        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
         if (!PeerManager.instance) {
             PeerManager.instance = new PeerManager()
         }
@@ -121,7 +119,6 @@ class PeerManager {
         })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
     public async sendMessageToAll(message: MadlibsMessage): Promise<void[]> {
         console.debug('Sending message to all', message)
         const sendPromises = Object.values(this.connections).map(
@@ -136,7 +133,7 @@ class PeerManager {
             },
         )
 
-        return await Promise.all(sendPromises)
+        return Promise.all(sendPromises)
     }
 
     public async sendMessage(
