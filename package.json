@@ -25,7 +25,7 @@
         "@typescript-eslint/parser": "^7.7.0",
         "@vitejs/plugin-react": "^4.2.1",
         "cypress": "^13.8.0",
-        "eslint": "^9.1.0",
+        "eslint": "^9.1.1",
         "eslint-plugin-react": "^7.34.1",
         "globals": "^15.0.0",
         "typescript": "^5.4.5",
