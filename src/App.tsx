@@ -12,6 +12,10 @@ import {
     processTemplateFile,
 } from './file_processing/txt_files'
 
+const escapeRegExp = (string: string): string => {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
 function App(): ReactElement {
     const [template, setTemplate] = useState('')
     const [inputs, setInputs] = useState<Record<string, string>>({})
@@ -235,7 +239,8 @@ function App(): ReactElement {
         let storyTemplate = template // Use the saved template
 
         Object.keys(inputs).forEach((key) => {
-            const regex = new RegExp(`{${key}}`, 'g') // Create a regex to match the placeholder
+            const escapedKey = escapeRegExp(key)
+            const regex = new RegExp(`{${escapedKey}}`, 'g') // Create a regex to match the placeholder
             storyTemplate = storyTemplate.replace(regex, inputs[key])
         })
 
