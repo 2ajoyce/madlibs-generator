@@ -12,6 +12,10 @@ import {
     processTemplateFile,
 } from './file_processing/txt_files'
 
+const escapeRegExp = (string: string): string => {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
 function App(): ReactElement {
     const [template, setTemplate] = useState('')
     const [inputs, setInputs] = useState<Record<string, string>>({})
@@ -229,10 +233,6 @@ function App(): ReactElement {
         if (sessionId == null) {
             sendTemplateMessage(newTemplate)
         }
-    }
-
-    const escapeRegExp = (string: string): string => {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     }
 
     const generateStory = (): void => {
