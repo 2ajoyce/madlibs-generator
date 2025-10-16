@@ -27,6 +27,11 @@ describe('<InputFields />', () => {
             placeholders: ['Foo$'],
             names: ['foo', 'baz'],
         },
+        {
+            inputs: { 'question?': 'answer', 'wo?rk?': 'test' }, // this checks question marks
+            placeholders: ['Question?', 'Wo?rk?'],
+            names: ['question', 'work'],
+        },
     ]
     testCases.forEach((testCase) => {
         it('renders inputs with a values and placeholders', () => {

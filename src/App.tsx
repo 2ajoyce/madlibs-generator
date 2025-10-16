@@ -231,11 +231,16 @@ function App(): ReactElement {
         }
     }
 
+    const escapeRegExp = (string: string): string => {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    }
+
     const generateStory = (): void => {
         let storyTemplate = template // Use the saved template
 
         Object.keys(inputs).forEach((key) => {
-            const regex = new RegExp(`{${key}}`, 'g') // Create a regex to match the placeholder
+            const escapedKey = escapeRegExp(key)
+            const regex = new RegExp(`{${escapedKey}}`, 'g') // Create a regex to match the placeholder
             storyTemplate = storyTemplate.replace(regex, inputs[key])
         })
 
