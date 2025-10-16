@@ -21,6 +21,7 @@
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true
     },
-    "include": ["src", "*.ts", "cypress"],
+    "include": ["src", "cypress"],
+    "exclude": ["vite.config.ts", "tsconfig.*.json"]
     "references": [{ "path": "./tsconfig.node.json" }]
 }
