@@ -23,6 +23,7 @@ npx cypress run                 # Run tests
 ### Code Style Guidelines
 - Use TypeScript strict mode
 - Functional components with hooks (no class components)
+- Use React.useState for state, React.useEffect for side effects
 - PascalCase for components, camelCase for variables/functions
 - Co-locate tests with components (`.cy.tsx` files)
 - Follow import order: React → External → Internal → CSS
