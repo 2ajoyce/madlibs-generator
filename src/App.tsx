@@ -55,7 +55,10 @@ function App(): ReactElement {
 
     useEffect(() => {
         const sendInitialState = async (): Promise<void> => {
-            const mostRecentPeerId = collaborators.at(-1)
+            const mostRecentPeerId =
+                collaborators.length > 0
+                    ? collaborators[collaborators.length - 1]
+                    : undefined
             if (mostRecentPeerId !== undefined) {
                 await peerManager.sendMessage(mostRecentPeerId, {
                     type: MadlibsMessageType.InitialState,
