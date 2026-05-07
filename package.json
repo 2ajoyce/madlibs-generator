@@ -11,24 +11,24 @@
         "update": "npx ncu -u"
     },
     "dependencies": {
-        "firebase": "^12.11.0",
+        "firebase": "^12.12.1",
         "peerjs": "^1.5.4",
-        "react": "^19.2.0",
-        "react-dom": "^19.2.4",
-        "uuid": "^13.0.0"
+        "react": "^19.2.6",
+        "react-dom": "^19.2.6",
+        "uuid": "^13.0.2"
     },
     "devDependencies": {
         "@types/react": "^19.2.14",
         "@types/react-dom": "^19.2.3",
         "@types/uuid": "^11.0.0",
-        "@typescript-eslint/eslint-plugin": "^8.58.0",
-        "@typescript-eslint/parser": "^8.57.2",
+        "@typescript-eslint/eslint-plugin": "^8.59.2",
+        "@typescript-eslint/parser": "^8.59.2",
         "@vitejs/plugin-react": "^6.0.1",
-        "cypress": "^15.13.0",
-        "eslint": "^9.0.0",
+        "cypress": "^15.14.2",
+        "eslint": "^9.39.4",
         "eslint-plugin-react": "^7.37.5",
-        "globals": "^17.4.0",
-        "typescript": "^6.0.2",
-        "vite": "^8.0.3"
+        "globals": "^17.6.0",
+        "typescript": "^6.0.3",
+        "vite": "^8.0.11"
     }
 }
