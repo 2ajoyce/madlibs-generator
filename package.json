@@ -27,7 +27,7 @@
         "cypress": "^15.18.1",
         "eslint": "^10.7.0",
         "eslint-plugin-react": "^7.37.5",
-        "globals": "^17.7.0",
+        "globals": "^17.8.0",
         "typescript": "^7.0.2",
         "vite": "^8.1.5"
     },
