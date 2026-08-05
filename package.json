@@ -29,7 +29,7 @@
         "eslint-plugin-react": "^7.37.5",
         "globals": "^17.8.0",
         "typescript": "^7.0.2",
-        "vite": "^8.1.5"
+        "vite": "^8.2.0"
     },
     "overrides": {
         "eslint-plugin-react": {
