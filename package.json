@@ -11,7 +11,7 @@
         "update": "npx ncu -u"
     },
     "dependencies": {
-        "firebase": "^13.0.0",
+        "firebase": "^13.1.0",
         "peerjs": "^1.5.4",
         "react": "^19.2.8",
         "react-dom": "^19.3.1",
@@ -24,7 +24,7 @@
         "@typescript-eslint/eslint-plugin": "^8.71.2",
         "@typescript-eslint/parser": "^8.72.1",
         "@vitejs/plugin-react": "^6.1.2",
-        "cypress": "^16.2.0",
+        "cypress": "^16.2.1",
         "eslint": "^10.14.0",
         "eslint-plugin-react": "^7.37.5",
         "globals": "^17.13.0",
